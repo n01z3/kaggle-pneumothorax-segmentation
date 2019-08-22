@@ -332,7 +332,7 @@ if __name__ == "__main__":
 		dataset_val, batch_size=1, shuffle=False, num_workers=4)
 
 		params = [p for p in model.parameters() if p.requires_grad]
-		optimizer = torch.optim.Adam(params, lr=0.0002)
+		optimizer = torch.optim.Adam(params, lr=0.0005)
 		lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 3, 1e-6)
 
 
