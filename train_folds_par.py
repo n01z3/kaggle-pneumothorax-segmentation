@@ -378,8 +378,8 @@ if __name__ == "__main__":
 		num_epochs = 15
 		for epoch in range(num_epochs):
 
-			train_one_epoch(model_ft, optimizer, train_loader, device, epoch+35, print_freq=200)
-			valscore = val_epoch(model_ft, optimizer, val_loader, device, epoch+35)
+			train_one_epoch(model, optimizer, train_loader, device, epoch+35, print_freq=200)
+			valscore = val_epoch(model, optimizer, val_loader, device, epoch+35)
 
 			if valscore > bestscore:
 				bestscore2=bestscore1
