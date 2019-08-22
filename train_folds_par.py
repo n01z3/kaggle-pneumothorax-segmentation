@@ -156,9 +156,14 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
 		if annotations[0] != '-1':
 			for rle in annotations:
 				mask_orig = rle2mask(rle, width, height).T
-			if width != self.width:
-				mask_orig = imresize(mask_orig, (self.width, self.height), interp='bilinear').astype(float)
-			mask += mask_orig
+				if width != self.width:
+					mask_orig = imresize(mask_orig, (self.width, self.height), interp='bilinear').astype(float)
+				mask += mask_orig
+
+		# 	for rle in annotations:
+		# 		mask += rle2mask(rle, width, height).T
+		# if width != self.width:
+		# 	mask = imresize(mask, (self.width, self.height), interp='bilinear').astype(float)
 
 		mask = (mask >= 1).astype('float32')
 
@@ -225,7 +230,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq):
 			optimizer.step()
 
 
-			if (cntr+1)% 200 == 0:
+			if (cntr+1)% print_freq == 0:
 				print('iteration: ', cntr, ' loss:', loss.item())
 				losses1 = np.array(losses)
 				print("Mean loss on train:", losses1.mean(), "Mean train DICE:", np.array(accur).mean())
@@ -295,6 +300,7 @@ def val_epoch(model, optimizer, data_loader, device, epoch, FOLD):
 
 
 if __name__ == "__main__":
+	print ("UnetSEResNext50 go")
 
 	df_path = "/mnt/ssd1/dataset/pneumothorax_data/train-rle.csv"
 	df = pd.read_csv(df_path)
@@ -312,6 +318,7 @@ if __name__ == "__main__":
 
 		bestscore = 0.001
 		bestscore1 = 0.001
+		bestscore2 = 0.001
 		device = torch.device('cuda')
 
 		model_name = 'UnetSEResNext50'
@@ -320,7 +327,6 @@ if __name__ == "__main__":
 		model = nn.DataParallel(model)
 
 		model.to(device)
-
 
 		for param in model.parameters():
 			param.requires_grad = True
@@ -332,49 +338,68 @@ if __name__ == "__main__":
 		dataset_val, batch_size=1, shuffle=False, num_workers=4)
 
 		params = [p for p in model.parameters() if p.requires_grad]
-		optimizer = torch.optim.Adam(params, lr=0.0005)
-		lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 3, 1e-6)
+		optimizer = torch.optim.Adam(params, lr=0.0002)
+		lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 4, 1e-6)
 
-
-		num_epochs = 50
+		num_epochs = 35
 		for epoch in range(num_epochs):
-			train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=100)
+			train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=200)
 
 			valscore = val_epoch(model, optimizer, val_loader, device, epoch, FOLD)
 
 			if valscore > bestscore:
+				bestscore2=bestscore1
 				bestscore1=bestscore 
 				bestscore=valscore
 				if os.path.isfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt'):
 					shutil.copyfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt', 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best2.pt')
+				if os.path.isfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best0.pt'):
+					shutil.copyfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best0.pt', 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt')
+				print ("SAVE 0 BEST MODEL! Epoch: ", epoch)
+				torch.save(model, 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best0.pt')
+			elif valscore > bestscore1:
+				bestscore2=bestscore1
+				bestscore1=valscore
+				if os.path.isfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt'):
+					shutil.copyfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt', 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best2.pt')
 				print ("SAVE 1 BEST MODEL! Epoch: ", epoch)
 				torch.save(model, 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt')
-			elif valscore > bestscore1:
-				bestscore1=valscore
+			elif valscore > bestscore2:
+				bestscore2=valscore
 				print ("SAVE 2 BEST MODEL! Epoch: ", epoch)
 				torch.save(model, 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best2.pt')
 
 			lr_scheduler.step()
 
-		model = torch.load('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt')
+		model = torch.load('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best0.pt')
 		optimizer = torch.optim.SGD(params, lr=0.0001, momentum=0.9)
-		lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=1e-5, max_lr=2e-4)
+		lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=1e-6, max_lr=2e-4)
 
-		num_epochs = 20
+		num_epochs = 15
 		for epoch in range(num_epochs):
 
-			train_one_epoch(model_ft, optimizer, train_loader, device, epoch+50, print_freq=100)
-			valscore = val_epoch(model_ft, optimizer, val_loader, device, epoch+50)
+			train_one_epoch(model_ft, optimizer, train_loader, device, epoch+35, print_freq=200)
+			valscore = val_epoch(model_ft, optimizer, val_loader, device, epoch+35)
 
 			if valscore > bestscore:
+				bestscore2=bestscore1
 				bestscore1=bestscore 
 				bestscore=valscore
 				if os.path.isfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt'):
 					shutil.copyfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt', 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best2.pt')
+				if os.path.isfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best0.pt'):
+					shutil.copyfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best0.pt', 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt')
+				print ("SAVE 0 BEST MODEL! Epoch: ", epoch)
+				torch.save(model, 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best0.pt')
+			elif valscore > bestscore1:
+				bestscore2=bestscore1
+				bestscore1=valscore
+				if os.path.isfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt'):
+					shutil.copyfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt', 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best2.pt')
 				print ("SAVE 1 BEST MODEL! Epoch: ", epoch)
 				torch.save(model, 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt')
-			elif valscore > bestscore1:
-				bestscore1=valscore
+			elif valscore > bestscore2:
+				bestscore2=valscore
 				print ("SAVE 2 BEST MODEL! Epoch: ", epoch)
 				torch.save(model, 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best2.pt')
 
