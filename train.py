@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import os
 import glob
-import pydicom
 import sys
 import tqdm
 import shutil
@@ -10,6 +9,7 @@ from tqdm import tqdm_notebook
 import datetime
 import time
 import torch
+import torch.nn as nn
 from torch.autograd import Variable
 import torch.utils.data
 import torch.utils.data as D
@@ -21,11 +21,11 @@ from torchvision import transforms
 import random
 from sklearn.model_selection import KFold
 
-from pretrained_models import *
-from augs import *
+from pretrained_models import UnetSEResNext101, UnetSEResNext50, UnetSENet154
+from augs import soft_aug, strong_aug, strong_aug2
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-IMG_SIZE = 1024
+IMG_SIZE = 512
 
 seed = 486
 
@@ -153,9 +153,10 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
 		annotations = [item.strip() for item in annotations]
 		if annotations[0] != '-1':
 			for rle in annotations:
-				mask += rle2mask(rle, width, height).T
+				mask_orig = rle2mask(rle, width, height).T
 			if width != self.width:
-				mask = imresize(mask, (self.width, self.height), interp='bilinear').astype(float)
+				mask_orig = imresize(mask_orig, (self.width, self.height), interp='bilinear').astype(float)
+			mask += mask_orig
 
 		mask = (mask >= 1).astype('float32')
 
@@ -282,7 +283,7 @@ def val_epoch(model, optimizer, data_loader, device, epoch):
 
 
 if __name__ == "__main__":
-	ds_train = SIIMDataset_Unet("input/train-rle.csv", "input/train_png/", augmentations=1)
+	ds_train = SIIMDataset_Unet("/mnt/ssd1/dataset/pneumothorax_data/train-rle.csv", "/mnt/ssd1/dataset/pneumothorax_data/dataset1024/train/", augmentations=1)
 	train_length=int(0.9* len(ds_train))
 	val_length=len(ds_train)-train_length
 

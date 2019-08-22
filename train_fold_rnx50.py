@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import os
 import glob
-import pydicom
 import sys
 import tqdm
 import shutil
@@ -10,6 +9,7 @@ from tqdm import tqdm_notebook
 import datetime
 import time
 import torch
+import torch.nn as nn
 from torch.autograd import Variable
 import torch.utils.data
 import torch.utils.data as D
@@ -21,13 +21,13 @@ from torchvision import transforms
 import random
 from sklearn.model_selection import KFold
 
-from pretrained_models import *
-from augs import *
+from pretrained_models import UnetSEResNext101, UnetSEResNext50, UnetSENet154
+from augs import soft_aug, strong_aug, strong_aug2
 
 
 # from mask_functions import rle2mask, mask2rle
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-IMG_SIZE = 1024
+IMG_SIZE = 512
 BATCH_SIZE = 2
 seed = 42
 
@@ -151,13 +151,14 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
 		if width != self.width:
 			img = imresize(img, (self.width, self.height), interp='bilinear')
 
-		mask = np.zeros((width,height))
+		mask = np.zeros((self.width,self.height))
 		annotations = [item.strip() for item in annotations]
 		if annotations[0] != '-1':
 			for rle in annotations:
-				mask += rle2mask(rle, width, height).T
-		if width != self.width:
-			mask = imresize(mask, (self.width, self.height), interp='bilinear').astype(float)
+				mask_orig = rle2mask(rle, width, height).T
+			if width != self.width:
+				mask_orig = imresize(mask_orig, (self.width, self.height), interp='bilinear').astype(float)
+			mask += mask_orig
 
 		mask = (mask >= 1).astype('float32')
 
@@ -295,7 +296,7 @@ def val_epoch(model, optimizer, data_loader, device, epoch, FOLD):
 
 if __name__ == "__main__":
 
-	df_path = "input/train-rle.csv"
+	df_path = "/mnt/ssd1/dataset/pneumothorax_data/train-rle.csv"
 	df = pd.read_csv(df_path)
 	kf = KFold(n_splits = 5, shuffle = True, random_state = 42)
 	FOLD = 0
@@ -306,8 +307,8 @@ if __name__ == "__main__":
 		df_val = df.iloc[val_index]
 
 
-		dataset_train = SIIMDataset_Unet(df_train, "input/train_png/", augmentations=1)
-		dataset_val = SIIMDataset_Unet(df_val, "input/train_png/", augmentations=1)
+		dataset_train = SIIMDataset_Unet(df_train, "/mnt/ssd1/dataset/pneumothorax_data/dataset1024/train/", augmentations=1)
+		dataset_val = SIIMDataset_Unet(df_val, "/mnt/ssd1/dataset/pneumothorax_data/dataset1024/train/", augmentations=1)
 
 		bestscore = 0.001
 		bestscore1 = 0.001
