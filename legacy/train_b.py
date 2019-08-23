@@ -9,8 +9,8 @@ from scipy.misc import imread, imresize
 from sklearn.model_selection import KFold
 from torch.autograd import Variable
 
-from augs import *
-from pretrained_models import *
+from legacy.augs import *
+from legacy.pretrained_models import *
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 IMG_SIZE = 1024

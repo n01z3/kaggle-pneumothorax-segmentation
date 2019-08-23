@@ -1,24 +1,13 @@
 import numpy as np
 import pandas as pd
 import os
-import glob
-import sys
 import tqdm
-from tqdm import tqdm_notebook
-import datetime
-import time
-import torch
 from torch.autograd import Variable
 import torch.utils.data
 from PIL import Image, ImageFile
 from scipy.misc import imread, imresize, imsave
 from scipy import ndimage
-import cv2
-import collections
-import torchvision
 from torchvision import transforms
-import random
-from pretrained_models import *
 import albumentations
 
 

@@ -1,9 +1,6 @@
 from torch import nn
-import torch
-from torchvision import models
-import torchvision
 from torch.nn import functional as F
-from senet import *
+from legacy.senet import *
 
 ## https://github.com/ternaus/robot-surgery-segmentation/blob/master/models.py ##
 

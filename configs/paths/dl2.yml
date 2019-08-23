@@ -1,0 +1,13 @@
+dumps:
+  path: '/mnt/hdd1/learning_dumps/pneumo'
+  weights: 'weights'
+  hard: 'hard_samples'
+  logs: 'logs'
+  predictions: 'predictions'
+  samples: 'samples'
+
+dataset:
+  path: '/mnt/ssd1/dataset/pneumothorax_data/dataset1024'
+  images_dir: 'train'
+  masks_dir: 'mask'
+  test_dir: 'test'

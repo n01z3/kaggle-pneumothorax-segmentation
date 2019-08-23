@@ -1,29 +1,19 @@
 import numpy as np
 import pandas as pd
 import os
-import glob
-import sys
-import tqdm
 import shutil
-from tqdm import tqdm_notebook
-import datetime
-import time
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import torch.utils.data
-import torch.utils.data as D
-from PIL import Image, ImageFile
-from scipy.misc import imread, imresize, imsave
+from PIL import ImageFile
+from scipy.misc import imread, imresize
 
-import torchvision
-from torchvision import transforms
 import random
 from sklearn.model_selection import KFold
 
-from pretrained_models import UnetSEResNext101, UnetSEResNext50, UnetSENet154
-from augs import soft_aug, strong_aug, strong_aug2
-
+from legacy.pretrained_models import UnetSEResNext50
+from legacy.augs import strong_aug
 
 # from mask_functions import rle2mask, mask2rle
 ImageFile.LOAD_TRUNCATED_IMAGES = True

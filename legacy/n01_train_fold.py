@@ -12,8 +12,8 @@ from scipy.misc import imread, imresize
 from sklearn.model_selection import KFold
 from torch.autograd import Variable
 
-from augs import soft_aug
-from pretrained_models import UnetSEResNext50
+from legacy.augs import soft_aug
+from legacy.pretrained_models import UnetSEResNext50
 
 # from mask_functions import rle2mask, mask2rle
 ImageFile.LOAD_TRUNCATED_IMAGES = True

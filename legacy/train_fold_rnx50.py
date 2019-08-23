@@ -1,33 +1,25 @@
 import numpy as np
 import pandas as pd
 import os
-import glob
-import sys
-import tqdm
 import shutil
-from tqdm import tqdm_notebook
-import datetime
-import time
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import torch.utils.data
-import torch.utils.data as D
-from PIL import Image, ImageFile
-from scipy.misc import imread, imresize, imsave
+from PIL import ImageFile
+from scipy.misc import imread, imresize
 
-import torchvision
-from torchvision import transforms
 import random
 from sklearn.model_selection import KFold
 
-from pretrained_models import UnetSEResNext101, UnetSEResNext50, UnetSENet154
-from augs import soft_aug, strong_aug, strong_aug2
+from legacy.pretrained_models import UnetSEResNext101
+from legacy.augs import strong_aug
 
+# from mask_functions import rle2mask, mask2rle
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 IMG_SIZE = 512
-
-seed = 486
+BATCH_SIZE = 2
+seed = 42
 
 random.seed(seed)
 os.environ['PYTHONHASHSEED']=str(seed)
@@ -41,7 +33,6 @@ else:
     print ("ERROR: CUDA is not available. Exit")
 torch.backends.cudnn.benchmark=False
 torch.backends.cudnn.deterministic=True
-
 
 def dice_coef_metric(inputs, target):
 
@@ -128,9 +119,10 @@ def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
 	return torch.optim.lr_scheduler.LambdaLR(optimizer, f)
 
 
+
 class SIIMDataset_Unet(torch.utils.data.Dataset):
-	def __init__(self, df_path, img_dir, augmentations):
-		self.df = pd.read_csv(df_path)
+	def __init__(self, my_df, img_dir, augmentations):
+		self.df = my_df
 		self.gb = self.df.groupby('ImageId')
 		self.fnames = list(self.gb.groups.keys())
 
@@ -167,7 +159,6 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
 			img = augmented['image']
 			mask = augmented['mask']
 		
-		# mask = mask / 255.
 		img = img[np.newaxis,:,:]
 		mask = mask[np.newaxis,:,:]
 
@@ -177,7 +168,7 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
 	def __len__(self):
 		return len(self.fnames)
 
-def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, losstype='bcedice'):
+def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq):
 	model.train()
 
 	cntr = 0
@@ -193,12 +184,11 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, lo
 
 	for i, traindata in enumerate(data_loader):
 		if (traindata[1].sum()):
-		
+
 			images, targets = traindata[0], traindata[1]
 
 			images_3chan = torch.FloatTensor(np.empty((images.shape[0],3,images.shape[2],images.shape[3])))
 			# kostyl
-			# print(i, data[0].shape, images_3chan.shape)
 			for chan_idx in range(3):
 				images_3chan[:,chan_idx:chan_idx+1,:,:]=images
 			# print ("train: ", images.shape, targets.shape, images_3chan.shape)
@@ -215,10 +205,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, lo
 
 			train_dice = dice_coef_metric(out_cut, targets.data.cpu().numpy())
 			
-			if losstype == 'dice_only':
-				loss = dice_coef_loss(outputs, targets)
-			else:
-				loss = bce_dice_loss(outputs, targets)
+			loss = bce_dice_loss(outputs, targets)
 
 			losses.append(loss.item())
 			accur.append(train_dice)
@@ -226,6 +213,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, lo
 			optimizer.zero_grad()
 			loss.backward()
 			optimizer.step()
+
 
 			if (cntr+1)% 200 == 0:
 				print('iteration: ', cntr, ' loss:', loss.item())
@@ -240,9 +228,9 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, lo
 	print("Mean loss on train:", losses1.mean(), "Mean DICE on train:", np.array(accur).mean())
 
 
-def val_epoch(model, optimizer, data_loader, device, epoch):
+def val_epoch(model, optimizer, data_loader, device, epoch, FOLD):
 
-	print("START validation")
+	print("START validation fold ", FOLD)
 	model.eval()
 
 	cntr = 0
@@ -250,6 +238,9 @@ def val_epoch(model, optimizer, data_loader, device, epoch):
 
 	# thresholds = [0.1, 0.3, 0.5, 0.7, 0.9]
 	thresholds = [0.5]
+
+	# if not os.path.exists(model_name+'_valout_'+str(FOLD)+'/'):
+	# 	os.mkdir(model_name+'_valout_'+str(FOLD)+'/')
 
 	for threshold in thresholds:
 		for i, valdata in enumerate(data_loader):
@@ -259,7 +250,6 @@ def val_epoch(model, optimizer, data_loader, device, epoch):
 
 			images_3chan = torch.FloatTensor(np.empty((images.shape[0],3,images.shape[2],images.shape[3])))
 			# kostyl
-			# print(i, data[0].shape, images_3chan.shape)
 			for chan_idx in range(3):
 				images_3chan[:,chan_idx:chan_idx+1,:,:]=images
 
@@ -277,67 +267,85 @@ def val_epoch(model, optimizer, data_loader, device, epoch):
 			valloss += picloss
 			# print ("Validation loss:", picloss.item(), valloss/cntr)
 
+			# images = images.data.cpu().numpy()
+			# targets = targets.data.cpu().numpy()
+			# outputs = outputs.data.cpu().numpy()
+
+
+			# if (epoch+1) % 1 == 0:
+			# 	for image, image1, image2 in zip(images[0], outputs[0], targets[0]):
+			# 		imsave(model_name+'_valout_'+str(FOLD)+'/'+str(cntr)+'_test.png', image)
+			# 		imsave(model_name+'_valout_'+str(FOLD)+'/'+str(cntr)+'_pred.png', image1)
+			# 		imsave(model_name+'_valout_'+str(FOLD)+'/'+str(cntr)+'_gt.png', image2)
+
+
 		print ("Epoch:  "+str(epoch)+"  Threshold:  "+str(threshold)+"  Validation loss:", valloss/cntr)
 
 	return valloss/cntr
 
 
 if __name__ == "__main__":
-	ds_train = SIIMDataset_Unet("/mnt/ssd1/dataset/pneumothorax_data/train-rle.csv", "/mnt/ssd1/dataset/pneumothorax_data/dataset1024/train/", augmentations=1)
-	train_length=int(0.9* len(ds_train))
-	val_length=len(ds_train)-train_length
 
-	dataset_train, dataset_val = D.random_split(ds_train, (train_length, val_length))
+	df_path = "/mnt/ssd1/dataset/pneumothorax_data/train-rle.csv"
+	df = pd.read_csv(df_path)
+	kf = KFold(n_splits = 5, shuffle = True, random_state = 42)
+	FOLD = 0
 
-	bestscore = 0.001
-	device = torch.device('cuda:0')
+	for train_index, val_index in kf.split(df):
+		print ("START training FOLD ", FOLD)
+		df_train = df.iloc[train_index]
+		df_val = df.iloc[val_index]
 
-	model_name = 'UnetSEResNext101'
 
-	if not os.path.exists('outs/'):
-		os.makedirs('outs/')
+		dataset_train = SIIMDataset_Unet(df_train, "/mnt/ssd1/dataset/pneumothorax_data/dataset1024/train/", augmentations=1)
+		dataset_val = SIIMDataset_Unet(df_val, "/mnt/ssd1/dataset/pneumothorax_data/dataset1024/train/", augmentations=1)
 
-	train_loader = torch.utils.data.DataLoader(
-	dataset_train, batch_size=2, shuffle=True, num_workers=4)
+		bestscore = 0.001
+		bestscore1 = 0.001
+		device = torch.device('cuda:0')
 
-	val_loader = torch.utils.data.DataLoader(
-	dataset_val, batch_size=1, shuffle=False, num_workers=4)
+		model_name = 'UnetSEResNext101'
 
-	model_ft = UnetSEResNext101()
-	model_ft.to(device)
+		model = UnetSEResNext101()
 
-	for param in model_ft.parameters():
-		param.requires_grad = True
+		model.to(device)
 
-	params = [p for p in model_ft.parameters() if p.requires_grad]
-	optimizer = torch.optim.Adam(params, lr=0.0001)
-	lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 4, 1e-6)
 
-	num_epochs = 30
-	for epoch in range(num_epochs):
+		for param in model.parameters():
+			param.requires_grad = True
 
-		train_one_epoch(model_ft, optimizer, train_loader, device, epoch, print_freq=100)
-		valscore = val_epoch(model_ft, optimizer, val_loader, device, epoch)
+		train_loader = torch.utils.data.DataLoader(
+		dataset_train, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
 
-		if valscore > bestscore: 
-			bestscore=valscore
-			print ("SAVE BEST MODEL! Epoch: ", epoch)
-			torch.save(model_ft, 'outs/'+model_name+'_'+str(IMG_SIZE)+'_bcedice.pt')
-		lr_scheduler.step()
+		val_loader = torch.utils.data.DataLoader(
+		dataset_val, batch_size=1, shuffle=False, num_workers=4)
 
-	model_ft = torch.load('outs/'+model_name+'_'+str(IMG_SIZE)+'_bcedice.pt')
-	optimizer = torch.optim.SGD(params, lr=0.0001, momentum=0.9)
-	lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=1e-5, max_lr=2e-4)
+		params = [p for p in model.parameters() if p.requires_grad]
+		optimizer = torch.optim.Adam(params, lr=0.0002)
+		lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 3, 1e-6)
 
-	num_epochs = 10
-	for epoch in range(num_epochs):
 
-		train_one_epoch(model_ft, optimizer, train_loader, device, epoch+30, print_freq=100)
-		valscore = val_epoch(model_ft, optimizer, val_loader, device, epoch+30)
+		num_epochs = 30
+		for epoch in range(num_epochs):
+			train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=100)
 
-		if valscore > bestscore: 
-			bestscore=valscore
-			print ("SAVE BEST MODEL! Epoch: ", epoch+30)
-			torch.save(model_ft, 'outs/'+model_name+'_'+str(IMG_SIZE)+'_bcedice.pt')
-		lr_scheduler.step()
+			valscore = val_epoch(model, optimizer, val_loader, device, epoch, FOLD)
 
+			if valscore > bestscore:
+				bestscore1=bestscore 
+				bestscore=valscore
+				if os.path.isfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt'):
+					shutil.copyfile('outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt', 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best2.pt')
+				print ("SAVE 1 BEST MODEL! Epoch: ", epoch)
+				torch.save(model, 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best1.pt')
+			elif valscore > bestscore1:
+				bestscore1=valscore
+				print ("SAVE 2 BEST MODEL! Epoch: ", epoch)
+				torch.save(model, 'outs/'+model_name+'_'+str(IMG_SIZE)+'_fold'+str(FOLD)+'_best2.pt')
+
+			lr_scheduler.step()
+
+		FOLD += 1
+
+
+	# valscore = val_epoch(model, optimizer, val_loader, device, 99)
