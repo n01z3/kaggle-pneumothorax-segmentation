@@ -10,10 +10,12 @@ import torch
 import torch.utils.data
 from PIL import ImageFile
 from torch.autograd import Variable
+from tqdm import tqdm
 
 from n02_utils import warmup_lr_scheduler
-from n03_loss_metric import dice_coef_metric, dice_coef_loss, bce_dice_loss
-from n03_zoo import UnetSEResNext50
+from n03_loss_metric import dice_coef_loss, bce_dice_loss
+from n03_loss_metric import dice_coef_metric_batch as dice_coef_metric
+from n03_zoo import UnetSEResNext50, UnetSEResNext101
 from n04_dataset import SIIMDataset_Unet
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -50,7 +52,7 @@ def mkdir(path):
 
 
 def train_one_epoch(
-    model, optimizer, data_loader, device, epoch, print_freq, losstype="bcedice"
+        model, optimizer, data_loader, device, epoch, print_freq, losstype="bcedice"
 ):
     model.train()
 
@@ -68,7 +70,15 @@ def train_one_epoch(
 
         lr_scheduler = warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor)
 
-    for i, traindata in enumerate(data_loader):
+    progress_bar = tqdm(
+        enumerate(data_loader),
+        total=len(data_loader),
+        desc="Predicting",
+        ncols=0,
+        postfix=["dice:", "loss:"],
+    )
+
+    for i, traindata in progress_bar:
         if traindata[1].sum():
             # if 1:  # only for fine-tuning!
 
@@ -79,7 +89,7 @@ def train_one_epoch(
             )
             # print(i, data[0].shape, images_3chan.shape)
             for chan_idx in range(3):
-                images_3chan[:, chan_idx : chan_idx + 1, :, :] = images
+                images_3chan[:, chan_idx: chan_idx + 1, :, :] = images
             # print ("train: ", images.shape, targets.shape, images_3chan.shape)
 
             images = Variable(images_3chan.cuda())
@@ -92,23 +102,11 @@ def train_one_epoch(
             out_cut[np.nonzero(out_cut >= 0.5)] = 1.0
 
             train_dice = dice_coef_metric(out_cut, targets.data.cpu().numpy())
-            # print ("BATCH train DICE: ", train_dice)
-            # print ('output:', outputs.dtype, targets.dtype)
-
-            # bcescore = nn.BCELoss()
-            # if targets.sum() == 0:
-            # 	loss = dice_coef_loss(outputs, targets, prints=1)
-            # else:
-
-            # loss = dice_coef_loss(outputs, targets)
-            # loss = nn.BCELoss()(outputs, targets)
 
             if losstype == "dice_only":
                 loss = dice_coef_loss(outputs, targets)
             else:
                 loss = bce_dice_loss(outputs, targets)
-
-            # loss = FocalLoss()(outputs, targets)
 
             losses.append(loss.item())
             accur.append(train_dice)
@@ -117,15 +115,10 @@ def train_one_epoch(
             loss.backward()
             optimizer.step()
 
-            if (cntr + 1) % 400 == 0:
-                print("iteration: ", cntr, " loss:", loss.item())
-                losses1 = np.array(losses)
-                print(
-                    "Mean loss on train:",
-                    losses1.mean(),
-                    "Mean train DICE:",
-                    np.array(accur).mean(),
-                )
+            if cntr % 10 == 0:
+                progress_bar.postfix[0] = f'loss: {np.mean(np.array(losses)):0.4f}'
+                progress_bar.postfix[1] = f'dice: {np.mean(np.array(accur)):0.4f}'
+                progress_bar.update()
 
             if lr_scheduler is not None:
                 lr_scheduler.step()
@@ -134,33 +127,30 @@ def train_one_epoch(
     print("Epoch [%d]" % (epoch))
     print(
         "Mean loss on train:",
-        losses1.mean(),
+        np.array(losses).mean(),
         "Mean DICE on train:",
         np.array(accur).mean(),
     )
-    # if nmbr > 10:
-    # 	break
 
 
-def val_epoch(model, optimizer, data_loader, device, epoch):
+def val_epoch(model, optimizer, data_loader_valid, device, epoch):
     print("START validation")
     model.eval()
-    # cntr = 0
-    val_outs = []
-    val_labels = []
-    # threshold = 0.1
     cntr = 0
     valloss = 0
 
-    # thresholds = [0.1, 0.3, 0.5, 0.7, 0.9]
-    thresholds = [0.5]
+    threshold = 0.5
 
-    # if not os.path.exists(model_name+'_valout/'):
-    # 	os.mkdir(model_name+'_valout/')
+    progress_bar_valid = tqdm(
+        enumerate(data_loader_valid),
+        total=len(data_loader_valid),
+        desc="Predicting",
+        ncols=0,
+        postfix=["dice:"],
+    )
 
-    # for images, targets in metric_logger.log_every(data_loader, print_freq, header):
-    for threshold in thresholds:
-        for i, valdata in enumerate(data_loader):
+    with torch.set_grad_enabled(False):
+        for i, valdata in progress_bar_valid:
             cntr += 1
             images = valdata[0]
             targets = valdata[1]
@@ -168,63 +158,28 @@ def val_epoch(model, optimizer, data_loader, device, epoch):
             images_3chan = torch.FloatTensor(
                 np.empty((images.shape[0], 3, images.shape[2], images.shape[3]))
             )
-            # print(i, data[0].shape, images_3chan.shape)
+
             for chan_idx in range(3):
-                images_3chan[:, chan_idx : chan_idx + 1, :, :] = images
+                images_3chan[:, chan_idx: chan_idx + 1, :, :] = images
 
             images = Variable(images_3chan.cuda())
             targets = Variable(targets.cuda())
 
             outputs = model(images)
 
-            # picloss = dice_coef_metric(outputs, targets)
-            # print ("Validation loss:", picloss.item())
             out_cut = np.copy(outputs.data.cpu().numpy())
             out_cut[np.nonzero(out_cut < threshold)] = 0.0
             out_cut[np.nonzero(out_cut >= threshold)] = 1.0
 
             picloss = dice_coef_metric(out_cut, targets.data.cpu().numpy())
-            # print ("Validation loss:", picloss)
             valloss += picloss
-            # print ("Validation loss:", picloss.item(), valloss/cntr)
-
-            # images = images.data.cpu().numpy()
-            # targets = targets.data.cpu().numpy()
-            # outputs = outputs.data.cpu().numpy()
-
-            # # print("shapes:", test.shape, gt.shape, pred.shape)
-            # if (epoch+1) % 1 == 0:
-            # 	for image, image1, image2 in zip(images[0], outputs[0], targets[0]):
-            # 		imsave(model_name+'_valout/'+str(cntr)+'_test.png', image)
-            # 		imsave(model_name+'_valout/'+str(cntr)+'_pred.png', image1)
-            # 		imsave(model_name+'_valout/'+str(cntr)+'_gt.png', image2)
-
-            # loss, bceloss, diceloss = bce_dice_loss(out_cut, val_labels)
-            # print ("Sanity:", outputs.max(), targets.max())
-            # print ("Sanity:", outputs.min(), targets.min())
-            # print ("Validation loss:", picloss.item())
-            # print ('output:', outputs.shape)
-            # val_outs.append(outputs.data.cpu().numpy())
-            # val_labels.append(targets.data.cpu().numpy())
-
-        # loss on validation data #
-        # val_labels = np.squeeze(val_labels)
-        # val_outs = np.squeeze(val_outs)
-
-        # out_cut = np.copy(val_outs)
-        # out_cut[np.nonzero(out_cut<threshold)]=0.
-        # out_cut[np.nonzero(out_cut>=threshold)]=1.
-
-        # print ("VALID:", val_labels.max(), out_cut.max())
-        # loss = dice_coef_loss(out_cut, val_labels)
-        # loss, bceloss, diceloss = bce_dice_loss(out_cut, val_labels)
 
         print(
             "Epoch:  "
             + str(epoch)
             + "  Threshold:  "
             + str(threshold)
-            + "  Validation loss:",
+            + "  Validation DICE score:",
             valloss / cntr,
         )
 
@@ -247,12 +202,12 @@ if __name__ == "__main__":
 
     dataset_train = SIIMDataset_Unet(mode="train", fold=args.fold)
     tloader = torch.utils.data.DataLoader(
-        dataset_train, batch_size=2, shuffle=True, num_workers=8
+        dataset_train, batch_size=2, shuffle=True, num_workers=12
     )
 
     dataset_valid = SIIMDataset_Unet(mode="valid", fold=args.fold)
     vloader = torch.utils.data.DataLoader(
-        dataset_valid, batch_size=1, shuffle=False, num_workers=8
+        dataset_valid, batch_size=4, shuffle=False, num_workers=8
     )
 
     switch_grads = 1
@@ -260,7 +215,7 @@ if __name__ == "__main__":
     bestscore = 0.001
     device = torch.device("cuda:0")
 
-    model_name = f"UnetSEResNext101_fold{args.fold}_best.pth"
+    model_name = f"sx101_fold{args.fold}_best.pth"
     dst = "outs"
     os.makedirs(dst, exist_ok=True)
 
@@ -268,7 +223,7 @@ if __name__ == "__main__":
     ################################ FROM SCRATCH ON 1024 ##########################################
     ################################################################################################
 
-    model_ft = UnetSEResNext50()
+    model_ft = UnetSEResNext101()
     model_ft.to(device)
 
     for param in model_ft.parameters():
@@ -296,7 +251,7 @@ if __name__ == "__main__":
         optimizer, base_lr=1e-5, max_lr=2e-4
     )
 
-    num_epochs = 10
+    num_epochs = 20
     for epoch in range(num_epochs):
 
         train_one_epoch(
@@ -314,7 +269,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(params, lr=0.0001)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 4, 1e-6)
 
-    num_epochs = 10
+    num_epochs = 20
     for epoch in range(num_epochs):
 
         train_one_epoch(
@@ -322,11 +277,11 @@ if __name__ == "__main__":
             optimizer,
             tloader,
             device,
-            epoch + 45,
+            epoch + 50,
             print_freq=100,
             losstype="dice_only",
         )
-        valscore = val_epoch(model_ft, optimizer, vloader, device, epoch + 45)
+        valscore = val_epoch(model_ft, optimizer, vloader, device, epoch + 50)
 
         if valscore > bestscore:
             bestscore = valscore

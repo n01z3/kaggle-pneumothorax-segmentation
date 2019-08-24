@@ -1,6 +1,8 @@
 import os
-
+import warnings
+from time import time
 import matplotlib.pyplot as plt
+import cv2
 import numpy as np
 import pandas as pd
 # import pickle
@@ -22,6 +24,8 @@ from tqdm import tqdm
 
 from n01_config import get_paths
 from n02_utils import rle2mask
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def strong_aug(p=0.5):
@@ -59,19 +63,25 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
         if mode == "train":
             self.df = self.df[self.df["fold_id"] != fold]
         elif mode == "valid":
-            self.df = self.df[self.df["fold_id"] != fold]
+            self.df = self.df[self.df["fold_id"] == fold]
         else:
             self.df = pd.read_csv("tables/test.csv")
+
+        print(f'{mode} {self.df.shape[0]}')
 
         self.gb = self.df.groupby("ImageId")
         self.fnames = list(self.gb.groups.keys())
 
         paths = get_paths()
 
+        self.paths = paths
         self.height = image_size
         self.width = image_size
         self.image_dir = os.path.join(
             paths["dataset"]["path"], paths["dataset"]["images_dir"]
+        )
+        self.mask_dir = os.path.join(
+            paths["dataset"]["path"], paths["dataset"]["masks_dir"]
         )
         if mode == "test":
             self.image_dir = os.path.join(
@@ -81,28 +91,36 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
         if mode == "train":
             self.augs = True
         self.transform = strong_aug()
+        self.cache = False
 
     def __getitem__(self, idx):
         image_id = self.fnames[idx]
         df = self.gb.get_group(image_id)
         annotations = df[" EncodedPixels"].tolist()
-        image_path = os.path.join(self.image_dir, image_id + ".png")
-        img = imread(image_path)
+        img = imread(os.path.join(self.image_dir, f'{image_id}.png'))
         width, height = img.shape[0], img.shape[1]
         if width != self.width:
             img = imresize(img, (self.width, self.height), interp="bilinear")
 
-        mask = np.zeros((self.width, self.height))
+        mask = np.zeros((width, height))
         annotations = [item.strip() for item in annotations]
         if annotations[0] != "-1":
+            # if self.cache:
+            #     mask = imread(os.path.join(self.image_dir, f'{image_id}.png'))
+            # else:
             for rle in annotations:
                 mask += rle2mask(rle, width, height).T
-            if width != self.width:
-                mask = imresize(
-                    mask, (self.width, self.height), interp="bilinear"
-                ).astype(float)
+
+        if width != self.width:
+            mask = imresize(
+                mask, (self.width, self.height), interp="bilinear"
+            ).astype(float)
 
         mask = (mask >= 1).astype("float32")  # for overlap cases
+        mask_save = np.uint8(255 * mask)
+        cv2.imwrite(os.path.join(
+            self.paths["dataset"]["path"], self.paths["dataset"]["masks_dir"], f'{image_id}.png'
+        ), mask_save)
 
         if self.augs:
             augmented = self.transform(image=img, mask=mask)
@@ -124,23 +142,32 @@ def check_dataset():
     side = int(1.2 * batch_size ** 0.5)
     mode = 'valid'
 
-    dataset = SIIMDataset_Unet(mode=mode)
-    tloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    progress_bar = tqdm(enumerate(tloader), total=len(tloader), desc='Predicting', ncols=0)
+    for i in range(10):
+        dataset = SIIMDataset_Unet(mode=mode, fold=i, image_size=512)
+        vloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=16)
+        progress_bar = tqdm(enumerate(vloader), total=len(vloader), desc='Predicting', ncols=0, postfix=["DICE:", dict(value=0), 'loss:', dict(value=0)])
 
-    for n, data in progress_bar:
-        images, masks = data
-        images = images.numpy()
-        masks = masks.numpy()
-        print(images.shape, masks.shape)
-        plt.figure(figsize=(25, 35))
-        for i in range(batch_size):
-            plt.subplot(side, side, i + 1)
-            plt.imshow(images[i, 0], cmap='gray')
+        t0 = time()
+        for n, data in progress_bar:
+            images, masks = data
+            images = images.numpy()
+            masks = masks.numpy()
 
-            plt.title(f'area:{np.sum(masks[i])}')
-            plt.imshow(masks[i, 0], alpha=0.5, cmap='Reds')
-        plt.show()
+            if n % 20 == 0:
+                progress_bar.postfix[1] = n / 2
+                progress_bar.postfix[3] = n * 2
+                progress_bar.update()
+            print(images.shape, masks.shape)
+            plt.figure(figsize=(25, 35))
+            for i in range(batch_size):
+                plt.subplot(side, side, i + 1)
+                plt.imshow(images[i, 0], cmap='gray')
+
+                plt.title(f'area:{np.sum(masks[i])}')
+                plt.imshow(masks[i, 0], alpha=0.5, cmap='Reds')
+            plt.show()
+
+        print(time() - t0)
 
 
 if __name__ == '__main__':

@@ -5,4 +5,4 @@ train_fold() {
   CUDA_VISIBLE_DEVICES=${2} python train_orig.py --fold=${1} | tee ${1}'fold_1.log'
 }
 export -f train_fold
-parallel -j8 --line-buffer train_fold {} '$(({%} % 8))' ::: {0..7}
+parallel -j6 --line-buffer train_fold {} '$(({%} % 6))' ::: {0..9}
