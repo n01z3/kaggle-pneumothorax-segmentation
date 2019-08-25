@@ -15,7 +15,7 @@ from tqdm import tqdm
 from n02_utils import warmup_lr_scheduler
 from n03_loss_metric import dice_coef_loss, bce_dice_loss
 from n03_loss_metric import dice_coef_metric_batch as dice_coef_metric
-from n03_zoo import UnetSEResNext101
+from n03_zoo import UnetSENet154
 from n04_dataset import SIIMDataset_Unet
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -172,6 +172,7 @@ def parse_args():
 
 
 if __name__ == "__main__":
+    eps = 0.0005
     args = parse_args()
 
     dataset_train = SIIMDataset_Unet(mode="train", fold=args.fold)
@@ -185,7 +186,7 @@ if __name__ == "__main__":
     bestscore = 0.001
     device = torch.device("cuda:0")
 
-    model_name = f"sx50_fold{args.fold}_best.pth"
+    model_name = f"se154_fold{args.fold}_best.pth"
     dst = "outs"
     os.makedirs(dst, exist_ok=True)
 
@@ -193,7 +194,7 @@ if __name__ == "__main__":
     ################################ FROM SCRATCH ON 1024 ##########################################
     ################################################################################################
 
-    model_ft = UnetSEResNext101()
+    model_ft = UnetSENet154()
     model_ft.to(device)
 
     for param in model_ft.parameters():
@@ -209,10 +210,10 @@ if __name__ == "__main__":
         train_one_epoch(model_ft, optimizer, tloader, device, epoch, print_freq=100)
         valscore = val_epoch(model_ft, optimizer, vloader, device, epoch)
 
-        if valscore > bestscore:
+        if valscore > bestscore - eps:
             bestscore = valscore
             print("SAVE BEST MODEL! Epoch: ", epoch)
-            torch.save(model_ft, osp.join(dst, model_name))
+            torch.save(model_ft, osp.join(dst, f"{valscore:0.5f}_{model_name}"))
         lr_scheduler.step()
 
     model_ft = torch.load(osp.join(dst, model_name))
@@ -225,10 +226,10 @@ if __name__ == "__main__":
         train_one_epoch(model_ft, optimizer, tloader, device, epoch + 30, print_freq=100)
         valscore = val_epoch(model_ft, optimizer, vloader, device, epoch + 30)
 
-        if valscore > bestscore:
+        if valscore > bestscore - eps:
             bestscore = valscore
             print("SAVE BEST MODEL! Epoch: ", epoch + 30)
-            torch.save(model_ft, osp.join(dst, model_name))
+            torch.save(model_ft, osp.join(dst, f"{valscore:0.5f}_{model_name}"))
         lr_scheduler.step()
 
     model_ft = torch.load(osp.join(dst, model_name))
@@ -241,8 +242,8 @@ if __name__ == "__main__":
         train_one_epoch(model_ft, optimizer, tloader, device, epoch + 50, print_freq=100, losstype="dice_only")
         valscore = val_epoch(model_ft, optimizer, vloader, device, epoch + 50)
 
-        if valscore > bestscore:
+        if valscore > bestscore - eps:
             bestscore = valscore
-            print("SAVE BEST MODEL! Epoch: ", epoch + 45)
-            torch.save(model_ft, osp.join(dst, model_name))
+            print("SAVE BEST MODEL! Epoch: ", epoch + 50)
+            torch.save(model_ft, osp.join(dst, f"{valscore:0.5f}_{model_name}"))
         lr_scheduler.step()
