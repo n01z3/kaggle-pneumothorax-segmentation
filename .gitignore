@@ -1,0 +1,5 @@
+/.build/script.py
+/data
+*.so
+*.o
+.idea

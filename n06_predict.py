@@ -116,7 +116,7 @@ def main():
 
         for fold in lst:
             score = predict_fold(
-                "sx101",
+                "sx50",
                 fold=fold,
                 mode=mode,
                 out_folder=dumps_dir,
