@@ -2,15 +2,15 @@ __author__ = "n01z3"
 
 import os
 import os.path as osp
+from multiprocessing import Pool
 
 import cv2
-import matplotlib.pyplot as plt
+import numpy as np
 import torch
 from tqdm import tqdm
-from multiprocessing import Pool
-from n03_loss_metric import dice_coef_metric_batch, dice_coef_metric
+
+from n03_loss_metric import dice_coef_metric
 from n04_dataset import SIIMDataset_Unet
-import numpy as np
 
 DEVICE = torch.device("cuda:0")
 from torch.autograd import Variable
@@ -45,12 +45,11 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
         batch1ch = torch.cat([images, mirror], dim=0)
         batch3ch = torch.FloatTensor(np.empty((batch1ch.shape[0], 3, batch1ch.shape[2], batch1ch.shape[3])))
         for chan_idx in range(3):
-            batch3ch[:, chan_idx : chan_idx + 1, :, :] = batch1ch
+            batch3ch[:, chan_idx: chan_idx + 1, :, :] = batch1ch
         images = Variable(batch3ch.cuda())
         targets = targets.data.cpu().numpy()
 
         preictions = model_ft(images)
-
         probability = preictions.data.cpu().numpy()
 
         for j in range(2):
@@ -58,7 +57,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
                 np.concatenate([probability[0 + j], probability[2 + j][:, :, ::-1]], axis=0), axis=0
             )
             outputs.append(np.uint8(255 * probabilityTTA))
-            filenames.append(osp.join(dst, f"{ ids[j]}.png"))
+            filenames.append(osp.join(dst, f"{ids[j]}.png"))
             gts.append(targets[j, 0])
 
     with Pool() as pool:
@@ -72,14 +71,18 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
 
     scores = []
     if validate:
-        for y_pred, y_true in zip(gts, outputs):
-            scores.append(dice_coef_metric(y_true >= 128, y_true))
+        for y_true, y_pred in zip(gts, outputs):
+            scores.append(dice_coef_metric(y_pred >= 128, y_true > 0.5))
 
     print(f"\n{model_name} fold{fold} {np.mean(scores):0.4f}")
 
 
 def main():
-    predict_fold("sx50", fold=1)
+    for mode in ['valid', 'test']:
+        for fold in range(10):
+            predict_fold("sx50", fold=fold, mode=mode,
+                         out_folder='/mnt/ssd2/dataset/pneumo/predictions/sota_predictions',
+                         weights_dir='/media/n01z3/red3_2/learning_dumps/pneumo/sota_weights')
 
 
 if __name__ == "__main__":
