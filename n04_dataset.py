@@ -1,3 +1,5 @@
+__author__ = "n01z3"
+
 import os
 import warnings
 from time import time
@@ -7,7 +9,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-# import pickle
 import torch
 import torch.utils.data
 from albumentations import (
@@ -70,6 +71,7 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
             self.df = self.df[self.df["fold_id"] == fold]
         else:
             self.df = pd.read_csv("tables/test.csv")
+            self.df[" EncodedPixels"] = ["-1"] * self.df.shape[0]
 
         print(f"{mode} {self.df.shape[0]}")
 
@@ -85,6 +87,7 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
         self.mask_dir = os.path.join(paths["dataset"]["path"], paths["dataset"]["masks_dir"])
         if mode == "test":
             self.image_dir = os.path.join(paths["dataset"]["path"], paths["dataset"]["test_dir"])
+
         self.augs = False
         if mode == "train":
             self.augs = True

@@ -21,6 +21,11 @@ def save_img(data):
     cv2.imwrite(filename, image)
 
 
+def calc_score(data):
+    y_true, y_pred = data
+    return dice_coef_metric(y_pred >= 128, y_true > 0.5)
+
+
 @torch.no_grad()
 def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_dir="outs", validate=True):
     assert mode in ("train", "valid", "test"), mode
@@ -45,7 +50,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
         batch1ch = torch.cat([images, mirror], dim=0)
         batch3ch = torch.FloatTensor(np.empty((batch1ch.shape[0], 3, batch1ch.shape[2], batch1ch.shape[3])))
         for chan_idx in range(3):
-            batch3ch[:, chan_idx: chan_idx + 1, :, :] = batch1ch
+            batch3ch[:, chan_idx : chan_idx + 1, :, :] = batch1ch
         images = Variable(batch3ch.cuda())
         targets = targets.data.cpu().numpy()
 
@@ -60,29 +65,44 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
             filenames.append(osp.join(dst, f"{ids[j]}.png"))
             gts.append(targets[j, 0])
 
-    with Pool() as pool:
+    with Pool() as p:
         list(
             tqdm(
-                pool.imap_unordered(save_img, zip(filenames, outputs)),
+                p.imap_unordered(save_img, zip(filenames, outputs)),
                 total=len(filenames),
                 desc="saving predictions to image",
             )
         )
+    p.close()
 
-    scores = []
-    if validate:
-        for y_true, y_pred in zip(gts, outputs):
-            scores.append(dice_coef_metric(y_pred >= 128, y_true > 0.5))
+    with Pool() as p:
+        scores = list(tqdm(p.imap_unordered(calc_score, zip(gts, outputs)), total=len(filenames), desc="calc score"))
+    p.close()
 
-    print(f"\n{model_name} fold{fold} {np.mean(scores):0.4f}")
+    # scores = []
+    # if validate:
+    #     for y_true, y_pred in zip(gts, outputs):
+    #         scores.append(dice_coef_metric(y_pred >= 128, y_true > 0.5))
+
+    score = np.mean(scores)
+    print(f"\n{model_name} fold{fold} {score:0.4f}\n")
+    return score
 
 
 def main():
-    for mode in ['valid', 'test']:
+    scores = []
+    for mode in ["test", "valid"]:
         for fold in range(10):
-            predict_fold("sx50", fold=fold, mode=mode,
-                         out_folder='/mnt/ssd2/dataset/pneumo/predictions/sota_predictions',
-                         weights_dir='/media/n01z3/red3_2/learning_dumps/pneumo/sota_weights')
+            score = predict_fold(
+                "sx50",
+                fold=fold,
+                mode=mode,
+                out_folder="/mnt/ssd2/dataset/pneumo/predictions/sota_predictions",
+                weights_dir="/media/n01z3/red3_2/learning_dumps/pneumo/sota_weights",
+            )
+            scores.append(score)
+    print(scores[:10])
+    print(scores[-10:])
 
 
 if __name__ == "__main__":

@@ -1,27 +1,10 @@
+__author__ = "n01z3"
+
 import numpy as np
-import pandas as pd
-import os
-import glob
-import sys
-import tqdm
-from collections import defaultdict, deque
-import datetime
 
 # import pickle
-import time
-import torch.distributed as dist
-import errno
 import torch
-from torch.autograd import Variable
 import torch.utils.data
-import torch.utils.data as D
-from PIL import Image, ImageFile
-from scipy.misc import imread, imresize, imsave
-
-import collections
-import torchvision
-from torchvision import transforms
-import random
 
 
 def rle2mask(rle, width, height):

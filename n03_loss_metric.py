@@ -1,8 +1,9 @@
+__author__ = "n01z3"
+
 from glob import glob
 
 import cv2
 import numpy as np
-# import pickle
 from torch import nn
 from tqdm import tqdm
 
@@ -51,7 +52,7 @@ def bce_dice_loss(inputs, target):
 
 
 class SOTALoss(nn.Module):
-    def __init__(self, ):
+    def __init__(self,):
         super().__init__()
         self.bce = nn.BCELoss()
         self.dice = dice_coef_loss
@@ -64,9 +65,7 @@ class SOTALoss(nn.Module):
 
 def main():
     filenames = sorted(
-        glob(
-            "/media/n01z3/red3_2/learning_dumps/pneumo/dn121_v5_1/fold_1/predictions/epoch0_metric0.8629_show/*png"
-        )
+        glob("/media/n01z3/red3_2/learning_dumps/pneumo/dn121_v5_1/fold_1/predictions/epoch0_metric0.8629_show/*png")
     )
     print(filenames)
     y_true, y_pred = [], []
@@ -75,7 +74,7 @@ def main():
         print(raw.shape)
 
         y_t = raw[:, -768:] / 255.0
-        y_p = raw[:, 768 + 3: 2 * 768 + 3] / 255.0
+        y_p = raw[:, 768 + 3 : 2 * 768 + 3] / 255.0
         y_pred.append(y_p)
         y_true.append(y_t)
 
@@ -95,14 +94,14 @@ def main():
         scores1.append(score)
 
     print(scores1)
-    print('per_image:', np.mean(scores1))
+    print("per_image:", np.mean(scores1))
 
     y_true = np.expand_dims(np.array(y_true), 1)
     y_pred = np.expand_dims(np.array(y_pred), 1)
 
     print(y_pred.shape, y_true.shape)
 
-    print('per_batch:', dice_coef_metric_batch(y_pred, y_true))
+    print("per_batch:", dice_coef_metric_batch(y_pred, y_true))
 
 
 if __name__ == "__main__":

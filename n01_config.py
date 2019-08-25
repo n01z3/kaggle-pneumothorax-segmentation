@@ -1,3 +1,5 @@
+__author__ = 'n01z3'
+
 import os.path as osp
 import socket
 
