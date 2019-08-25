@@ -1,0 +1,609 @@
+iteration:  399  loss: 1.1177130937576294
+Mean loss on train: 1.027323691546917 Mean train DICE: 0.0
+iteration:  799  loss: 0.3503898084163666
+Mean loss on train: 0.8980564459785819 Mean train DICE: 0.14467089506300793
+iteration:  1199  loss: 0.18817947804927826
+Mean loss on train: 0.8327180286621054 Mean train DICE: 0.2149720932917956
+iteration:  1599  loss: 0.8076869249343872
+Mean loss on train: 0.7989805485680699 Mean train DICE: 0.25103761236936534
+Epoch [0]
+Mean loss on train: 0.7989805485680699 Mean DICE on train: 0.27150207341963384
+START validation
+Epoch:  0  Threshold:  0.5  Validation loss: 0.6362697138559623
+SAVE BEST MODEL! Epoch:  0
+iteration:  399  loss: 0.47884613275527954
+Mean loss on train: 0.632612682217732 Mean train DICE: 0.41825542837637164
+iteration:  799  loss: 0.5174136161804199
+Mean loss on train: 0.6178340844390914 Mean train DICE: 0.4302988082672716
+iteration:  1199  loss: 0.21510948240756989
+Mean loss on train: 0.6184521528581778 Mean train DICE: 0.429959956506142
+iteration:  1599  loss: 0.841266393661499
+Mean loss on train: 0.6236585811525583 Mean train DICE: 0.4247110209799408
+Epoch [1]
+Mean loss on train: 0.6236585811525583 Mean DICE on train: 0.428619112860169
+START validation
+Epoch:  1  Threshold:  0.5  Validation loss: 0.7072674417917291
+SAVE BEST MODEL! Epoch:  1
+iteration:  399  loss: 0.15208588540554047
+Mean loss on train: 0.56451400635764 Mean train DICE: 0.47769162267274745
+iteration:  799  loss: 0.37735071778297424
+Mean loss on train: 0.5589893366489559 Mean train DICE: 0.4829758932081609
+iteration:  1199  loss: 0.28573739528656006
+Mean loss on train: 0.5467158419949313 Mean train DICE: 0.49450458742766945
+iteration:  1599  loss: 0.4786222279071808
+Mean loss on train: 0.5459393363073468 Mean train DICE: 0.4953610704072365
+Epoch [2]
+Mean loss on train: 0.5459393363073468 Mean DICE on train: 0.49702062912167916
+START validation
+Epoch:  2  Threshold:  0.5  Validation loss: 0.6713808900618212
+iteration:  399  loss: 0.3712197542190552
+Mean loss on train: 0.5031548385135829 Mean train DICE: 0.532207280513047
+iteration:  799  loss: 0.927661120891571
+Mean loss on train: 0.49416355666238815 Mean train DICE: 0.5410413137998326
+iteration:  1199  loss: 0.42284464836120605
+Mean loss on train: 0.4926432610458384 Mean train DICE: 0.5423152449710328
+iteration:  1599  loss: 0.35026270151138306
+Mean loss on train: 0.48910267907427624 Mean train DICE: 0.5462492793731186
+Epoch [3]
+Mean loss on train: 0.48910267907427624 Mean DICE on train: 0.5480796517110349
+START validation
+Epoch:  3  Threshold:  0.5  Validation loss: 0.7697605791279709
+SAVE BEST MODEL! Epoch:  3
+iteration:  399  loss: 0.5800652503967285
+Mean loss on train: 0.4773463242687285 Mean train DICE: 0.5591092985345545
+iteration:  799  loss: 0.3800952732563019
+Mean loss on train: 0.4724584757909179 Mean train DICE: 0.5634784991252633
+iteration:  1199  loss: 0.1628383845090866
+Mean loss on train: 0.47899581991756957 Mean train DICE: 0.556901091245946
+iteration:  1599  loss: 0.5034496784210205
+Mean loss on train: 0.47175703693181276 Mean train DICE: 0.5636193646274118
+Epoch [4]
+Mean loss on train: 0.47175703693181276 Mean DICE on train: 0.5677098410060729
+START validation
+Epoch:  4  Threshold:  0.5  Validation loss: 0.8253182341359433
+SAVE BEST MODEL! Epoch:  4
+iteration:  399  loss: 0.4400913715362549
+Mean loss on train: 0.4581712549366057 Mean train DICE: 0.5789499145127889
+iteration:  799  loss: 0.471434086561203
+Mean loss on train: 0.47188204766251146 Mean train DICE: 0.5638720919306819
+iteration:  1199  loss: 0.32436296343803406
+Mean loss on train: 0.46422409889598687 Mean train DICE: 0.5708998167863779
+iteration:  1599  loss: 0.34234318137168884
+Mean loss on train: 0.46641763049643487 Mean train DICE: 0.5690090895304888
+Epoch [5]
+Mean loss on train: 0.46641763049643487 Mean DICE on train: 0.5692367362113565
+START validation
+Epoch:  5  Threshold:  0.5  Validation loss: 0.8237767838801173
+iteration:  399  loss: 0.5879855155944824
+Mean loss on train: 0.47293890224769713 Mean train DICE: 0.5649370531581264
+iteration:  799  loss: 0.27644413709640503
+Mean loss on train: 0.4721589753869921 Mean train DICE: 0.5647594708479018
+iteration:  1199  loss: 0.21516171097755432
+Mean loss on train: 0.4733516936376691 Mean train DICE: 0.5632789586686721
+iteration:  1599  loss: 0.08124479651451111
+Mean loss on train: 0.485674272980541 Mean train DICE: 0.551221930556067
+Epoch [6]
+Mean loss on train: 0.485674272980541 Mean DICE on train: 0.546348154968948
+START validation
+Epoch:  6  Threshold:  0.5  Validation loss: 0.8014309430953314
+iteration:  399  loss: 0.6644894480705261
+Mean loss on train: 0.5236809912323952 Mean train DICE: 0.5175372145438943
+iteration:  799  loss: 0.4391014575958252
+Mean loss on train: 0.5231672487966716 Mean train DICE: 0.5164334830916364
+iteration:  1199  loss: 0.32001638412475586
+Mean loss on train: 0.5254168848817548 Mean train DICE: 0.5163966604422473
+iteration:  1599  loss: 0.3036007881164551
+Mean loss on train: 0.5190173187712207 Mean train DICE: 0.5209981868822502
+Epoch [7]
+Mean loss on train: 0.5190173187712207 Mean DICE on train: 0.5207150069811414
+START validation
+Epoch:  7  Threshold:  0.5  Validation loss: 0.7540658717740509
+iteration:  399  loss: 0.26694414019584656
+Mean loss on train: 0.558089988362044 Mean train DICE: 0.4858778857395069
+iteration:  799  loss: 0.9080052971839905
+Mean loss on train: 0.5370652977656573 Mean train DICE: 0.5042795299513747
+iteration:  1199  loss: 0.545860230922699
+Mean loss on train: 0.539970266285042 Mean train DICE: 0.5018094785694657
+iteration:  1599  loss: 0.235612690448761
+Mean loss on train: 0.5342048378149048 Mean train DICE: 0.5070095179195454
+Epoch [8]
+Mean loss on train: 0.5342048378149048 Mean DICE on train: 0.5074583728063377
+START validation
+Epoch:  8  Threshold:  0.5  Validation loss: 0.7285741086449844
+iteration:  399  loss: 0.1301717907190323
+Mean loss on train: 0.5159267223998905 Mean train DICE: 0.5265871980424743
+iteration:  799  loss: 0.6085208654403687
+Mean loss on train: 0.5320093767438084 Mean train DICE: 0.5099116620963429
+iteration:  1199  loss: 1.049215316772461
+Mean loss on train: 0.5201146366323034 Mean train DICE: 0.5201878018430871
+iteration:  1599  loss: 0.557837963104248
+Mean loss on train: 0.5152340699126944 Mean train DICE: 0.5254357581226646
+Epoch [9]
+Mean loss on train: 0.5152340699126944 Mean DICE on train: 0.5259430466381539
+START validation
+Epoch:  9  Threshold:  0.5  Validation loss: 0.789627538900459
+iteration:  399  loss: 0.38841700553894043
+Mean loss on train: 0.4756940975692123 Mean train DICE: 0.5631499515756524
+iteration:  799  loss: 0.4228987991809845
+Mean loss on train: 0.4703430291032419 Mean train DICE: 0.5656563531117801
+iteration:  1199  loss: 0.9154110550880432
+Mean loss on train: 0.46708761897248524 Mean train DICE: 0.5673919397507148
+iteration:  1599  loss: 0.6251113414764404
+Mean loss on train: 0.4674743613554165 Mean train DICE: 0.5674848429715
+Epoch [10]
+Mean loss on train: 0.4674743613554165 Mean DICE on train: 0.5690801167144512
+START validation
+Epoch:  10  Threshold:  0.5  Validation loss: 0.8282855137732574
+SAVE BEST MODEL! Epoch:  10
+iteration:  399  loss: 0.13586260378360748
+Mean loss on train: 0.4360880362801254 Mean train DICE: 0.5969558048134374
+iteration:  799  loss: 0.21226416528224945
+Mean loss on train: 0.4320294164866209 Mean train DICE: 0.6004591644447159
+iteration:  1199  loss: 0.8246768712997437
+Mean loss on train: 0.43367294416452445 Mean train DICE: 0.5983825744413701
+iteration:  1599  loss: 0.08015023171901703
+Mean loss on train: 0.428960473111365 Mean train DICE: 0.6023851266185826
+Epoch [11]
+Mean loss on train: 0.428960473111365 Mean DICE on train: 0.6004488979564497
+START validation
+Epoch:  11  Threshold:  0.5  Validation loss: 0.8375777951898713
+SAVE BEST MODEL! Epoch:  11
+iteration:  399  loss: 0.7766126394271851
+Mean loss on train: 0.41179151127114894 Mean train DICE: 0.6167656373056914
+iteration:  799  loss: 0.28347015380859375
+Mean loss on train: 0.4065691669192165 Mean train DICE: 0.6231780495803183
+iteration:  1199  loss: 1.0490933656692505
+Mean loss on train: 0.40723747239758573 Mean train DICE: 0.6225334746883314
+iteration:  1599  loss: 0.2770928740501404
+Mean loss on train: 0.4100804262701422 Mean train DICE: 0.6199608038252351
+Epoch [12]
+Mean loss on train: 0.4100804262701422 Mean DICE on train: 0.6197972844270841
+START validation
+Epoch:  12  Threshold:  0.5  Validation loss: 0.8391293242418482
+SAVE BEST MODEL! Epoch:  12
+iteration:  399  loss: 0.3138684332370758
+Mean loss on train: 0.4255870740674436 Mean train DICE: 0.6056539833107718
+iteration:  799  loss: 0.417298287153244
+Mean loss on train: 0.4157488432014361 Mean train DICE: 0.6144820442543018
+iteration:  1199  loss: 0.4414805769920349
+Mean loss on train: 0.41603692771246037 Mean train DICE: 0.6146632738649197
+iteration:  1599  loss: 1.0572787523269653
+Mean loss on train: 0.4154153225780465 Mean train DICE: 0.6145714513437862
+Epoch [13]
+Mean loss on train: 0.4154153225780465 Mean DICE on train: 0.6151458754301892
+START validation
+Epoch:  13  Threshold:  0.5  Validation loss: 0.841461006768675
+SAVE BEST MODEL! Epoch:  13
+iteration:  399  loss: 0.13788443803787231
+Mean loss on train: 0.406235300693661 Mean train DICE: 0.6245707807971231
+iteration:  799  loss: 1.0281617641448975
+Mean loss on train: 0.42092807507142427 Mean train DICE: 0.6105383252089244
+iteration:  1199  loss: 0.13419878482818604
+Mean loss on train: 0.432411859712253 Mean train DICE: 0.6005981098729211
+iteration:  1599  loss: 0.7143663167953491
+Mean loss on train: 0.4370316408481449 Mean train DICE: 0.5964945228486194
+Epoch [14]
+Mean loss on train: 0.4370316408481449 Mean DICE on train: 0.5900972211905471
+START validation
+Epoch:  14  Threshold:  0.5  Validation loss: 0.7666876397013729
+iteration:  399  loss: 0.19691546261310577
+Mean loss on train: 0.4269608576595783 Mean train DICE: 0.6029175313746628
+iteration:  799  loss: 0.5388389229774475
+Mean loss on train: 0.45103074562270196 Mean train DICE: 0.5817615478821032
+iteration:  1199  loss: 0.5896172523498535
+Mean loss on train: 0.4564284795274337 Mean train DICE: 0.5780007789949466
+iteration:  1599  loss: 0.605471670627594
+Mean loss on train: 0.458242638069205 Mean train DICE: 0.5765992287390949
+Epoch [15]
+Mean loss on train: 0.458242638069205 Mean DICE on train: 0.5728386674409559
+START validation
+Epoch:  15  Threshold:  0.5  Validation loss: 0.7350139578366308
+iteration:  399  loss: 0.7487425208091736
+Mean loss on train: 0.48219886187464 Mean train DICE: 0.5574264664798292
+iteration:  799  loss: 0.7312319874763489
+Mean loss on train: 0.4777506275009364 Mean train DICE: 0.5603122664374416
+iteration:  1199  loss: 0.17939232289791107
+Mean loss on train: 0.4809496906741212 Mean train DICE: 0.5565526860986956
+iteration:  1599  loss: 0.5359820127487183
+Mean loss on train: 0.4764658838533796 Mean train DICE: 0.5606599836324025
+Epoch [16]
+Mean loss on train: 0.4764658838533796 Mean DICE on train: 0.553577137133727
+START validation
+Epoch:  16  Threshold:  0.5  Validation loss: 0.7789729841692786
+iteration:  399  loss: 0.39077550172805786
+Mean loss on train: 0.4637738603632897 Mean train DICE: 0.573125543892154
+iteration:  799  loss: 0.6217057108879089
+Mean loss on train: 0.46153092924971134 Mean train DICE: 0.5742888404264852
+iteration:  1199  loss: 0.3242218494415283
+Mean loss on train: 0.4641465863523384 Mean train DICE: 0.5716118770899108
+iteration:  1599  loss: 0.5916111469268799
+Mean loss on train: 0.4726428123516962 Mean train DICE: 0.5639349634281338
+Epoch [17]
+Mean loss on train: 0.4726428123516962 Mean DICE on train: 0.5615253663611202
+START validation
+Epoch:  17  Threshold:  0.5  Validation loss: 0.8009773312874457
+iteration:  399  loss: 0.3488341271877289
+Mean loss on train: 0.41986990900710225 Mean train DICE: 0.6108921819958281
+iteration:  799  loss: 0.535659670829773
+Mean loss on train: 0.4258519504405558 Mean train DICE: 0.6063729407795728
+iteration:  1199  loss: 0.4124668836593628
+Mean loss on train: 0.44138399976926546 Mean train DICE: 0.5910992361962731
+iteration:  1599  loss: 0.710371196269989
+Mean loss on train: 0.4386605083942413 Mean train DICE: 0.5939855455145526
+Epoch [18]
+Mean loss on train: 0.4386605083942413 Mean DICE on train: 0.5978149615650639
+START validation
+Epoch:  18  Threshold:  0.5  Validation loss: 0.8023488043005659
+iteration:  399  loss: 0.3808583617210388
+Mean loss on train: 0.39352141972631216 Mean train DICE: 0.636344455978137
+iteration:  799  loss: 0.167120099067688
+Mean loss on train: 0.40045629526488485 Mean train DICE: 0.629606733529825
+iteration:  1199  loss: 0.316649466753006
+Mean loss on train: 0.3975553729074697 Mean train DICE: 0.6314838677323183
+iteration:  1599  loss: 0.26014941930770874
+Mean loss on train: 0.39479369937675074 Mean train DICE: 0.6337881349345619
+Epoch [19]
+Mean loss on train: 0.39479369937675074 Mean DICE on train: 0.6341282219423775
+START validation
+Epoch:  19  Threshold:  0.5  Validation loss: 0.8275719667603587
+iteration:  399  loss: 0.15966244041919708
+Mean loss on train: 0.39191714603453875 Mean train DICE: 0.6351640645694263
+iteration:  799  loss: 0.2881377637386322
+Mean loss on train: 0.3812653737026267 Mean train DICE: 0.6461807280477714
+iteration:  1199  loss: 0.290190726518631
+Mean loss on train: 0.38018025043886156 Mean train DICE: 0.6470588278200924
+iteration:  1599  loss: 0.317264199256897
+Mean loss on train: 0.3811028858704958 Mean train DICE: 0.64636514861377
+Epoch [20]
+Mean loss on train: 0.3811028858704958 Mean DICE on train: 0.6461904999360274
+START validation
+Epoch:  20  Threshold:  0.5  Validation loss: 0.8494631906338918
+SAVE BEST MODEL! Epoch:  20
+iteration:  399  loss: 0.6835910677909851
+Mean loss on train: 0.36300459736958146 Mean train DICE: 0.6656460053175715
+iteration:  799  loss: 0.15818671882152557
+Mean loss on train: 0.3720262534916401 Mean train DICE: 0.6560787110956161
+iteration:  1199  loss: 0.611190676689148
+Mean loss on train: 0.3774627346949031 Mean train DICE: 0.6510738929687463
+iteration:  1599  loss: 0.5631082653999329
+Mean loss on train: 0.38054401429835705 Mean train DICE: 0.6480187342016159
+Epoch [21]
+Mean loss on train: 0.38054401429835705 Mean DICE on train: 0.6459740884875769
+START validation
+Epoch:  21  Threshold:  0.5  Validation loss: 0.8321291180109108
+iteration:  399  loss: 0.18905650079250336
+Mean loss on train: 0.40205971013754604 Mean train DICE: 0.6273409061617754
+iteration:  799  loss: 0.20957405865192413
+Mean loss on train: 0.4047664664220065 Mean train DICE: 0.6252344266036257
+iteration:  1199  loss: 1.007482886314392
+Mean loss on train: 0.40454184499569235 Mean train DICE: 0.6256707520960131
+iteration:  1599  loss: 0.3139442503452301
+Mean loss on train: 0.40399314005626363 Mean train DICE: 0.6262422761948758
+Epoch [22]
+Mean loss on train: 0.40399314005626363 Mean DICE on train: 0.624080913734743
+START validation
+Epoch:  22  Threshold:  0.5  Validation loss: 0.7808284399775436
+iteration:  399  loss: 0.16451144218444824
+Mean loss on train: 0.4122263075225055 Mean train DICE: 0.6166394322869965
+iteration:  799  loss: 0.4854789674282074
+Mean loss on train: 0.4103858231194317 Mean train DICE: 0.6193169343409654
+iteration:  1199  loss: 0.732505202293396
+Mean loss on train: 0.4287904825309912 Mean train DICE: 0.6026969023195108
+iteration:  1599  loss: 0.18391361832618713
+Mean loss on train: 0.4306961090816185 Mean train DICE: 0.6012299433994301
+Epoch [23]
+Mean loss on train: 0.4306961090816185 Mean DICE on train: 0.6003764078685314
+START validation
+Epoch:  23  Threshold:  0.5  Validation loss: 0.8235811516803875
+iteration:  399  loss: 0.8828979730606079
+Mean loss on train: 0.42130952012725176 Mean train DICE: 0.6117650075944883
+iteration:  799  loss: 0.7748340368270874
+Mean loss on train: 0.43844115479849277 Mean train DICE: 0.5959615901962808
+iteration:  1199  loss: 0.42131683230400085
+Mean loss on train: 0.443977928503106 Mean train DICE: 0.5912725325691713
+iteration:  1599  loss: 0.13789786398410797
+Mean loss on train: 0.45362841876689347 Mean train DICE: 0.5818420048941018
+Epoch [24]
+Mean loss on train: 0.45362841876689347 Mean DICE on train: 0.5811140618083053
+START validation
+Epoch:  24  Threshold:  0.5  Validation loss: 0.7981026737206102
+iteration:  399  loss: 0.47958073019981384
+Mean loss on train: 0.42959154352545736 Mean train DICE: 0.6033852823105812
+iteration:  799  loss: 0.41850608587265015
+Mean loss on train: 0.4390226620528847 Mean train DICE: 0.5941252240186139
+iteration:  1199  loss: 0.34273561835289
+Mean loss on train: 0.4426408391259611 Mean train DICE: 0.5911310834476923
+iteration:  1599  loss: 0.13399524986743927
+Mean loss on train: 0.4472022754466161 Mean train DICE: 0.5868476892117215
+Epoch [25]
+Mean loss on train: 0.4472022754466161 Mean DICE on train: 0.5852359069625045
+START validation
+Epoch:  25  Threshold:  0.5  Validation loss: 0.8233900784505208
+iteration:  399  loss: 0.3663792312145233
+Mean loss on train: 0.3994119328074157 Mean train DICE: 0.6330642892616524
+iteration:  799  loss: 0.14516016840934753
+Mean loss on train: 0.412494715382345 Mean train DICE: 0.6186889593007665
+iteration:  1199  loss: 0.7425217032432556
+Mean loss on train: 0.41333967428654433 Mean train DICE: 0.6179336165794871
+iteration:  1599  loss: 0.12563681602478027
+Mean loss on train: 0.40864455114118753 Mean train DICE: 0.6219299010794618
+Epoch [26]
+Mean loss on train: 0.40864455114118753 Mean DICE on train: 0.6222530581346971
+START validation
+Epoch:  26  Threshold:  0.5  Validation loss: 0.8240307592453402
+iteration:  399  loss: 0.6168166399002075
+Mean loss on train: 0.3808671700581908 Mean train DICE: 0.6477988877995964
+iteration:  799  loss: 0.22183729708194733
+Mean loss on train: 0.3857966114161536 Mean train DICE: 0.6420473845360343
+iteration:  1199  loss: 0.19762809574604034
+Mean loss on train: 0.38018291655617453 Mean train DICE: 0.647412289896441
+iteration:  1599  loss: 0.31957530975341797
+Mean loss on train: 0.37960873630596326 Mean train DICE: 0.648363025791279
+Epoch [27]
+Mean loss on train: 0.37960873630596326 Mean DICE on train: 0.6480145588177108
+START validation
+Epoch:  27  Threshold:  0.5  Validation loss: 0.8463990479524296
+iteration:  399  loss: 0.34150034189224243
+Mean loss on train: 0.3671223105210811 Mean train DICE: 0.6587770285411971
+iteration:  799  loss: 0.5619996786117554
+Mean loss on train: 0.36711195271927866 Mean train DICE: 0.6594809820711948
+iteration:  1199  loss: 0.17072992026805878
+Mean loss on train: 0.3614656227330367 Mean train DICE: 0.6648005351595174
+iteration:  1599  loss: 0.16141213476657867
+Mean loss on train: 0.3615095084812492 Mean train DICE: 0.6648202027630771
+Epoch [28]
+Mean loss on train: 0.3615095084812492 Mean DICE on train: 0.6658105459199775
+START validation
+Epoch:  28  Threshold:  0.5  Validation loss: 0.8483401334668441
+iteration:  399  loss: 0.11877883225679398
+Mean loss on train: 0.3649180731549859 Mean train DICE: 0.659501355752171
+iteration:  799  loss: 0.10787783563137054
+Mean loss on train: 0.3630344305140898 Mean train DICE: 0.6620298469672684
+iteration:  1199  loss: 0.2332794964313507
+Mean loss on train: 0.370012145464619 Mean train DICE: 0.6558256641769498
+iteration:  1599  loss: 0.16524392366409302
+Mean loss on train: 0.3633307194011286 Mean train DICE: 0.6622857155393385
+Epoch [29]
+Mean loss on train: 0.3633307194011286 Mean DICE on train: 0.6607555387952468
+START validation
+Epoch:  29  Threshold:  0.5  Validation loss: 0.8391118923367589
+iteration:  399  loss: 0.3757351338863373
+Mean loss on train: 0.3874394863471389 Mean train DICE: 0.6395623736923196
+iteration:  799  loss: 0.1855175644159317
+Mean loss on train: 0.3829300742037594 Mean train DICE: 0.6449193926614575
+iteration:  1199  loss: 0.17641612887382507
+Mean loss on train: 0.3705822700386246 Mean train DICE: 0.6569710183884092
+iteration:  1599  loss: 0.4853515028953552
+Mean loss on train: 0.3791359851299785 Mean train DICE: 0.6483887178812543
+Epoch [30]
+Mean loss on train: 0.3791359851299785 Mean DICE on train: 0.6443938048682785
+START validation
+Epoch:  30  Threshold:  0.5  Validation loss: 0.8381544216460578
+iteration:  399  loss: 0.1717994660139084
+Mean loss on train: 0.3941457404848188 Mean train DICE: 0.6339627729160306
+iteration:  799  loss: 0.5066295266151428
+Mean loss on train: 0.37773424324579535 Mean train DICE: 0.6499577610226132
+iteration:  1199  loss: 0.2246706336736679
+Mean loss on train: 0.39017240338027476 Mean train DICE: 0.6378098866339773
+iteration:  1599  loss: 0.14940959215164185
+Mean loss on train: 0.3871972839487717 Mean train DICE: 0.6404927977040691
+Epoch [31]
+Mean loss on train: 0.3871972839487717 Mean DICE on train: 0.6411286571409581
+START validation
+Epoch:  31  Threshold:  0.5  Validation loss: 0.8354106959466889
+iteration:  399  loss: 0.1864674687385559
+Mean loss on train: 0.38781891580671074 Mean train DICE: 0.6411861847572499
+iteration:  799  loss: 0.2571653723716736
+Mean loss on train: 0.3803586308704689 Mean train DICE: 0.6468375171013823
+iteration:  1199  loss: 0.880793571472168
+Mean loss on train: 0.37712152338897187 Mean train DICE: 0.6504548005007299
+iteration:  1599  loss: 0.43919476866722107
+Mean loss on train: 0.38127435341477395 Mean train DICE: 0.6465623486223392
+Epoch [32]
+Mean loss on train: 0.38127435341477395 Mean DICE on train: 0.6468639758272464
+START validation
+Epoch:  32  Threshold:  0.5  Validation loss: 0.8381528720695061
+iteration:  399  loss: 0.31930485367774963
+Mean loss on train: 0.38318078162148594 Mean train DICE: 0.6439983491567948
+iteration:  799  loss: 0.21799534559249878
+Mean loss on train: 0.3736869877250865 Mean train DICE: 0.6541322602775574
+iteration:  1199  loss: 0.6837103366851807
+Mean loss on train: 0.37131246129982176 Mean train DICE: 0.656120864906981
+iteration:  1599  loss: 0.3569243550300598
+Mean loss on train: 0.37508462813915683 Mean train DICE: 0.652066613836286
+Epoch [33]
+Mean loss on train: 0.37508462813915683 Mean DICE on train: 0.6472816305251403
+START validation
+Epoch:  33  Threshold:  0.5  Validation loss: 0.840822293830139
+iteration:  399  loss: 0.17508219182491302
+Mean loss on train: 0.38646337451413276 Mean train DICE: 0.6422158894195501
+iteration:  799  loss: 0.0954781249165535
+Mean loss on train: 0.39032773544080557 Mean train DICE: 0.6378686389771763
+iteration:  1199  loss: 0.2534482479095459
+Mean loss on train: 0.38494799987102546 Mean train DICE: 0.6426542165214341
+iteration:  1599  loss: 0.2659255266189575
+Mean loss on train: 0.3810954373446293 Mean train DICE: 0.646325058104622
+Epoch [34]
+Mean loss on train: 0.3810954373446293 Mean DICE on train: 0.6485978659768632
+START validation
+Epoch:  34  Threshold:  0.5  Validation loss: 0.8444186435299091
+iteration:  399  loss: 1.099682092666626
+Mean loss on train: 0.4081595935486257 Mean train DICE: 0.6186392223977021
+iteration:  799  loss: 0.184785857796669
+Mean loss on train: 0.392403666190803 Mean train DICE: 0.6357609975254482
+iteration:  1199  loss: 0.682746946811676
+Mean loss on train: 0.38762210491423804 Mean train DICE: 0.6402377817509064
+iteration:  1599  loss: 0.8171595931053162
+Mean loss on train: 0.3846754405437969 Mean train DICE: 0.6434776792671619
+Epoch [35]
+Mean loss on train: 0.3846754405437969 Mean DICE on train: 0.644119753393402
+START validation
+Epoch:  35  Threshold:  0.5  Validation loss: 0.8425331091113379
+iteration:  399  loss: 0.177509605884552
+Mean loss on train: 0.4080659990571439 Mean train DICE: 0.6207756269838517
+iteration:  799  loss: 0.19241371750831604
+Mean loss on train: 0.4049936834233813 Mean train DICE: 0.623798648161292
+iteration:  1199  loss: 0.2088576853275299
+Mean loss on train: 0.3940316106270378 Mean train DICE: 0.6339446628993538
+iteration:  1599  loss: 0.08433426916599274
+Mean loss on train: 0.38625719446339646 Mean train DICE: 0.6418358235646671
+Epoch [36]
+Mean loss on train: 0.38625719446339646 Mean DICE on train: 0.6432458734607372
+START validation
+Epoch:  36  Threshold:  0.5  Validation loss: 0.838287198016178
+iteration:  399  loss: 0.1716386377811432
+Mean loss on train: 0.3814185604499653 Mean train DICE: 0.645483403982422
+iteration:  799  loss: 0.17504233121871948
+Mean loss on train: 0.3812875370751135 Mean train DICE: 0.6456453616897343
+iteration:  1199  loss: 0.27463728189468384
+Mean loss on train: 0.3823097928535814 Mean train DICE: 0.6455807461249293
+iteration:  1599  loss: 0.16119495034217834
+Mean loss on train: 0.38163953014998697 Mean train DICE: 0.6463299810067232
+Epoch [37]
+Mean loss on train: 0.38163953014998697 Mean DICE on train: 0.6425908926388842
+START validation
+Epoch:  37  Threshold:  0.5  Validation loss: 0.8152646870337168
+iteration:  399  loss: 0.1986476331949234
+Mean loss on train: 0.38928400733042506 Mean train DICE: 0.6392679477634939
+iteration:  799  loss: 0.4117380678653717
+Mean loss on train: 0.39041079400340095 Mean train DICE: 0.6386574373813212
+iteration:  1199  loss: 0.6179190278053284
+Mean loss on train: 0.3898125276202336 Mean train DICE: 0.6389251647459531
+iteration:  1599  loss: 0.21202658116817474
+Mean loss on train: 0.3907809682458174 Mean train DICE: 0.6376078258327875
+Epoch [38]
+Mean loss on train: 0.3907809682458174 Mean DICE on train: 0.64022404700305
+START validation
+Epoch:  38  Threshold:  0.5  Validation loss: 0.8290837948151402
+iteration:  399  loss: 0.34515318274497986
+Mean loss on train: 0.3778636720590293 Mean train DICE: 0.6493263254180911
+iteration:  799  loss: 0.12936300039291382
+Mean loss on train: 0.3770685476437211 Mean train DICE: 0.6502422556283741
+iteration:  1199  loss: 0.19066396355628967
+Mean loss on train: 0.37951359217676023 Mean train DICE: 0.6478520738128414
+iteration:  1599  loss: 0.14732502400875092
+Mean loss on train: 0.3816519239265472 Mean train DICE: 0.6460558325043532
+Epoch [39]
+Mean loss on train: 0.3816519239265472 Mean DICE on train: 0.646923836462067
+START validation
+Epoch:  39  Threshold:  0.5  Validation loss: 0.8279108386088537
+iteration:  399  loss: 0.12680327892303467
+Mean loss on train: 0.3579756653308868 Mean train DICE: 0.6463304797548459
+iteration:  799  loss: 0.22034108638763428
+Mean loss on train: 0.35731831543147563 Mean train DICE: 0.6469115140266632
+iteration:  1199  loss: 0.18418002128601074
+Mean loss on train: 0.35529547701279324 Mean train DICE: 0.648891036748079
+iteration:  1599  loss: 0.26075899600982666
+Mean loss on train: 0.3584964843466878 Mean train DICE: 0.6457453158191754
+Epoch [45]
+Mean loss on train: 0.3584964843466878 Mean DICE on train: 0.6462401709720268
+START validation
+Epoch:  45  Threshold:  0.5  Validation loss: 0.8353497589595401
+iteration:  399  loss: 0.48588472604751587
+Mean loss on train: 0.37209099158644676 Mean train DICE: 0.632162757265185
+iteration:  799  loss: 0.3170698285102844
+Mean loss on train: 0.3704522942006588 Mean train DICE: 0.6337992627690733
+iteration:  1199  loss: 0.3742470145225525
+Mean loss on train: 0.3612743769089381 Mean train DICE: 0.64296130040246
+iteration:  1599  loss: 0.22584956884384155
+Mean loss on train: 0.35672313034534453 Mean train DICE: 0.6475490678079203
+Epoch [46]
+Mean loss on train: 0.35672313034534453 Mean DICE on train: 0.6474912154947288
+START validation
+Epoch:  46  Threshold:  0.5  Validation loss: 0.8375911720722089
+iteration:  399  loss: 0.10622841119766235
+Mean loss on train: 0.36293701708316806 Mean train DICE: 0.6412805446947779
+iteration:  799  loss: 0.3320341110229492
+Mean loss on train: 0.3627453935146332 Mean train DICE: 0.6414694022872286
+iteration:  1199  loss: 0.2732091546058655
+Mean loss on train: 0.3588400249183178 Mean train DICE: 0.6454330685615558
+iteration:  1599  loss: 0.20492267608642578
+Mean loss on train: 0.35667909018695354 Mean train DICE: 0.6475880996950372
+Epoch [47]
+Mean loss on train: 0.35667909018695354 Mean DICE on train: 0.6441147092951922
+START validation
+Epoch:  47  Threshold:  0.5  Validation loss: 0.8312945073747648
+iteration:  399  loss: 0.2874860167503357
+Mean loss on train: 0.3550046171247959 Mean train DICE: 0.6490934540331875
+iteration:  799  loss: 0.9991551041603088
+Mean loss on train: 0.36024950303137304 Mean train DICE: 0.6439131642351887
+iteration:  1199  loss: 0.7236047983169556
+Mean loss on train: 0.35771584158142405 Mean train DICE: 0.6465813240413952
+iteration:  1599  loss: 0.29362499713897705
+Mean loss on train: 0.35474048152565957 Mean train DICE: 0.6495821640096412
+Epoch [48]
+Mean loss on train: 0.35474048152565957 Mean DICE on train: 0.6477143742615308
+START validation
+Epoch:  48  Threshold:  0.5  Validation loss: 0.8480295028955972
+iteration:  399  loss: 0.17997664213180542
+Mean loss on train: 0.37134084329009054 Mean train DICE: 0.6330312042759652
+iteration:  799  loss: 0.7973909378051758
+Mean loss on train: 0.3531036164611578 Mean train DICE: 0.651308666420625
+iteration:  1199  loss: 0.2847350239753723
+Mean loss on train: 0.36362181236346564 Mean train DICE: 0.6408406235838815
+iteration:  1599  loss: 0.24349528551101685
+Mean loss on train: 0.3621743754297495 Mean train DICE: 0.6422034836638365
+Epoch [49]
+Mean loss on train: 0.3621743754297495 Mean DICE on train: 0.6416265202802263
+START validation
+Epoch:  49  Threshold:  0.5  Validation loss: 0.8461625906598786
+iteration:  399  loss: 0.18908542394638062
+Mean loss on train: 0.34154242753982544 Mean train DICE: 0.6626548121553334
+iteration:  799  loss: 0.1956290602684021
+Mean loss on train: 0.34464989371597765 Mean train DICE: 0.6596199854850604
+iteration:  1199  loss: 0.19249802827835083
+Mean loss on train: 0.35188438345988593 Mean train DICE: 0.6523937642748298
+iteration:  1599  loss: 0.7897653579711914
+Mean loss on train: 0.3539188103377819 Mean train DICE: 0.6503380713108617
+Epoch [50]
+Mean loss on train: 0.3539188103377819 Mean DICE on train: 0.6480661443752493
+START validation
+Epoch:  50  Threshold:  0.5  Validation loss: 0.8375899338545132
+iteration:  399  loss: 0.41747617721557617
+Mean loss on train: 0.331786644756794 Mean train DICE: 0.6726886298520826
+iteration:  799  loss: 0.9996586441993713
+Mean loss on train: 0.34624217003583907 Mean train DICE: 0.6581953005732728
+iteration:  1199  loss: 0.47386765480041504
+Mean loss on train: 0.3479416722555955 Mean train DICE: 0.6565159119275568
+iteration:  1599  loss: 0.21072202920913696
+Mean loss on train: 0.3530105084180832 Mean train DICE: 0.6514074090701133
+Epoch [51]
+Mean loss on train: 0.3530105084180832 Mean DICE on train: 0.645550141466489
+START validation
+Epoch:  51  Threshold:  0.5  Validation loss: 0.8397689282951347
+iteration:  399  loss: 0.7417362928390503
+Mean loss on train: 0.3594090303778648 Mean train DICE: 0.6449123893004832
+iteration:  799  loss: 0.30489492416381836
+Mean loss on train: 0.36083385586738587 Mean train DICE: 0.6434053088773368
+iteration:  1199  loss: 0.16705197095870972
+Mean loss on train: 0.3575105080505212 Mean train DICE: 0.646827010084516
+iteration:  1599  loss: 0.3359212875366211
+Mean loss on train: 0.3555548913776875 Mean train DICE: 0.64875551381004
+Epoch [52]
+Mean loss on train: 0.3555548913776875 Mean DICE on train: 0.6473377303712158
+START validation
+Epoch:  52  Threshold:  0.5  Validation loss: 0.8365929788312574
+iteration:  399  loss: 0.18411040306091309
+Mean loss on train: 0.3402714529633522 Mean train DICE: 0.6640386343588551
+iteration:  799  loss: 0.9981294870376587
+Mean loss on train: 0.3534316314011812 Mean train DICE: 0.650759937036717
+iteration:  1199  loss: 0.4991800785064697
+Mean loss on train: 0.35289466043313344 Mean train DICE: 0.6513914038311236
+iteration:  1599  loss: 0.20473134517669678
+Mean loss on train: 0.3609617956727743 Mean train DICE: 0.643224447266668
+Epoch [53]
+Mean loss on train: 0.3609617956727743 Mean DICE on train: 0.6426402862596088
+START validation
+Epoch:  53  Threshold:  0.5  Validation loss: 0.843512507210918
+iteration:  399  loss: 0.2896028161048889
+Mean loss on train: 0.3491401267051697 Mean train DICE: 0.6554327468648207
+iteration:  799  loss: 0.33660614490509033
+Mean loss on train: 0.3648717238754034 Mean train DICE: 0.6395089696218534
+iteration:  1199  loss: 0.26541751623153687
+Mean loss on train: 0.35772647177179656 Mean train DICE: 0.6466683774471352
+iteration:  1599  loss: 0.5255166888237
+Mean loss on train: 0.35880727395415307 Mean train DICE: 0.645526970862383
+Epoch [54]
+Mean loss on train: 0.35880727395415307 Mean DICE on train: 0.6456208562964789
+START validation
+Epoch:  54  Threshold:  0.5  Validation loss: 0.8404549325619082

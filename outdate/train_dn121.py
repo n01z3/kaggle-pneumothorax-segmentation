@@ -12,10 +12,10 @@ from PIL import ImageFile
 from torch.autograd import Variable
 from tqdm import tqdm
 
+from outdate import n05_selim_zoo
 from n02_utils import warmup_lr_scheduler
 from n03_loss_metric import dice_coef_loss, bce_dice_loss
 from n03_loss_metric import dice_coef_metric_batch as dice_coef_metric
-from n03_zoo import UnetSEResNext101, UnetSEResNext50
 from n04_dataset import SIIMDataset_Unet
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -72,62 +72,52 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, lo
         enumerate(data_loader), total=len(data_loader), desc="Predicting", ncols=0, postfix=["dice:", "loss:"]
     )
 
-    count, neg = 0, 0
     for i, traindata in progress_bar:
         if traindata[1].sum():
-
             # if 1:  # only for fine-tuning!
 
             images, targets = traindata[0], traindata[1]
-            targets = targets.data.cpu().numpy()
-            # print(targets.shape)
 
-            for j in range(targets.shape[0]):
-                if np.sum(targets[j]) == 0:
-                    neg +=1
-                count += 1
+            images_3chan = torch.FloatTensor(np.empty((images.shape[0], 3, images.shape[2], images.shape[3])))
+            # print(i, data[0].shape, images_3chan.shape)
+            for chan_idx in range(3):
+                images_3chan[:, chan_idx : chan_idx + 1, :, :] = images
+            # print ("train: ", images.shape, targets.shape, images_3chan.shape)
 
-    print(count, neg, neg/count)
-    #         images_3chan = torch.FloatTensor(np.empty((images.shape[0], 3, images.shape[2], images.shape[3])))
-    #         # print(i, data[0].shape, images_3chan.shape)
-    #         for chan_idx in range(3):
-    #             images_3chan[:, chan_idx: chan_idx + 1, :, :] = images
-    #         # print ("train: ", images.shape, targets.shape, images_3chan.shape)
-    #
-    #         images = Variable(images_3chan.cuda())
-    #         targets = Variable(targets.cuda())
-    #
-    #         outputs = model(images)
-    #
-    #         out_cut = np.copy(outputs.data.cpu().numpy())
-    #         out_cut[np.nonzero(out_cut < 0.5)] = 0.0
-    #         out_cut[np.nonzero(out_cut >= 0.5)] = 1.0
-    #
-    #         train_dice = dice_coef_metric(out_cut, targets.data.cpu().numpy())
-    #
-    #         if losstype == "dice_only":
-    #             loss = dice_coef_loss(outputs, targets)
-    #         else:
-    #             loss = bce_dice_loss(outputs, targets)
-    #
-    #         losses.append(loss.item())
-    #         accur.append(train_dice)
-    #
-    #         optimizer.zero_grad()
-    #         loss.backward()
-    #         optimizer.step()
-    #
-    #         if cntr % 10 == 0:
-    #             progress_bar.postfix[0] = f"loss: {np.mean(np.array(losses)):0.4f}"
-    #             progress_bar.postfix[1] = f"dice: {np.mean(np.array(accur)):0.4f}"
-    #             progress_bar.update()
-    #
-    #         if lr_scheduler is not None:
-    #             lr_scheduler.step()
-    #         cntr += 1
-    #
-    # print("Epoch [%d]" % (epoch))
-    # print("Mean loss on train:", np.array(losses).mean(), "Mean DICE on train:", np.array(accur).mean())
+            images = Variable(images_3chan.cuda())
+            targets = Variable(targets.cuda())
+
+            outputs = model(images)
+
+            out_cut = np.copy(outputs.data.cpu().numpy())
+            out_cut[np.nonzero(out_cut < 0.5)] = 0.0
+            out_cut[np.nonzero(out_cut >= 0.5)] = 1.0
+
+            train_dice = dice_coef_metric(out_cut, targets.data.cpu().numpy())
+
+            if losstype == "dice_only":
+                loss = dice_coef_loss(outputs, targets)
+            else:
+                loss = bce_dice_loss(outputs, targets)
+
+            losses.append(loss.item())
+            accur.append(train_dice)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            if cntr % 10 == 0:
+                progress_bar.postfix[0] = f"loss: {np.mean(np.array(losses)):0.4f}"
+                progress_bar.postfix[1] = f"dice: {np.mean(np.array(accur)):0.4f}"
+                progress_bar.update()
+
+            if lr_scheduler is not None:
+                lr_scheduler.step()
+            cntr += 1
+
+    print("Epoch [%d]" % (epoch))
+    print("Mean loss on train:", np.array(losses).mean(), "Mean DICE on train:", np.array(accur).mean())
 
 
 def val_epoch(model, optimizer, data_loader_valid, device, epoch):
@@ -151,7 +141,7 @@ def val_epoch(model, optimizer, data_loader_valid, device, epoch):
             images_3chan = torch.FloatTensor(np.empty((images.shape[0], 3, images.shape[2], images.shape[3])))
 
             for chan_idx in range(3):
-                images_3chan[:, chan_idx: chan_idx + 1, :, :] = images
+                images_3chan[:, chan_idx : chan_idx + 1, :, :] = images
 
             images = Variable(images_3chan.cuda())
             targets = Variable(targets.cuda())
@@ -184,10 +174,10 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    dataset_train = SIIMDataset_Unet(mode="train", fold=args.fold)
+    dataset_train = SIIMDataset_Unet(mode="train", fold=args.fold, normalized=True)
     tloader = torch.utils.data.DataLoader(dataset_train, batch_size=2, shuffle=True, num_workers=12)
 
-    dataset_valid = SIIMDataset_Unet(mode="valid", fold=args.fold)
+    dataset_valid = SIIMDataset_Unet(mode="valid", fold=args.fold, normalized=True)
     vloader = torch.utils.data.DataLoader(dataset_valid, batch_size=4, shuffle=False, num_workers=8)
 
     switch_grads = 1
@@ -195,7 +185,7 @@ if __name__ == "__main__":
     bestscore = 0.001
     device = torch.device("cuda:0")
 
-    model_name = f"sx50_fold{args.fold}_best.pth"
+    model_name = f"sx101_fold{args.fold}_best.pth"
     dst = "outs"
     os.makedirs(dst, exist_ok=True)
 
@@ -203,7 +193,7 @@ if __name__ == "__main__":
     ################################ FROM SCRATCH ON 1024 ##########################################
     ################################################################################################
 
-    model_ft = UnetSEResNext50()
+    model_ft = n05_selim_zoo.DensenetUnet(seg_classes=1, backbone_arch="densenet121")
     model_ft.to(device)
 
     for param in model_ft.parameters():

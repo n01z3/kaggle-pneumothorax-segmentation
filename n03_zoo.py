@@ -695,7 +695,7 @@ class LinknetSEResNext152(nn.Module):
         super().__init__()
         assert num_channels == 3
         self.num_classes = num_classes
-        filters = [4*64, 4*128, 4*256, 4*512]
+        filters = [4 * 64, 4 * 128, 4 * 256, 4 * 512]
         resnet = se_resnet152(drop_rate=0.2)
 
         self.encoder0 = resnet.layer0
@@ -717,9 +717,7 @@ class LinknetSEResNext152(nn.Module):
         self.finalrelu2 = nn.ReLU(inplace=True)
         self.finalconv3 = nn.Conv2d(32, num_classes, 2, padding=1)
 
-        self.final = nn.Sequential(nn.Conv2d(32, num_classes, 2, padding=1),
-                       nn.Sigmoid(),)
-
+        self.final = nn.Sequential(nn.Conv2d(32, num_classes, 2, padding=1), nn.Sigmoid())
 
     # noinspection PyCallingNonCallable
     def forward(self, x):
@@ -753,7 +751,8 @@ class LinknetSEResNext152(nn.Module):
         else:
             f5 = self.final(f4)
             x_out = f5
-        return x_out 
+        return x_out
+
 
 class UnetSEResNext101_logits(nn.Module):
     def __init__(self, num_classes=1, num_channels=3, pretrained=True):

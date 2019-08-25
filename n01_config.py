@@ -8,6 +8,7 @@ PATHS = {
     "n01z3-dl1": "dl1",
     "n01z3-dl2": "dl2",
     "n01z3-dl4": "dl4",
+    "n01z3-dl6": "dl6",
     "n01z3-work": "work",
     "mn-dgx01.x5.ru": "dgx",
     "nizhib-dl1": "nizhib",

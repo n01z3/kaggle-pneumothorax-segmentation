@@ -335,7 +335,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.SGD(params, lr=0.0001, momentum=0.9)
     lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=1e-5, max_lr=2e-4)
 
-    num_epochs = 10
+    num_epochs = 20
     for epoch in range(num_epochs):
 
         train_one_epoch(model_ft, optimizer, train_loader, device, epoch + 30, print_freq=100)

@@ -5,6 +5,7 @@ import os.path as osp
 import random
 import warnings
 
+import cv2
 import numpy as np
 import torch
 import torch.utils.data
@@ -15,7 +16,7 @@ from tqdm import tqdm
 from n02_utils import warmup_lr_scheduler
 from n03_loss_metric import dice_coef_loss, bce_dice_loss
 from n03_loss_metric import dice_coef_metric_batch as dice_coef_metric
-from n03_zoo import UnetSEResNext101, UnetSEResNext50
+from n03_zoo import UnetSEResNext101
 from n04_dataset import SIIMDataset_Unet
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -72,62 +73,52 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, lo
         enumerate(data_loader), total=len(data_loader), desc="Predicting", ncols=0, postfix=["dice:", "loss:"]
     )
 
-    count, neg = 0, 0
     for i, traindata in progress_bar:
         if traindata[1].sum():
-
             # if 1:  # only for fine-tuning!
 
             images, targets = traindata[0], traindata[1]
-            targets = targets.data.cpu().numpy()
-            # print(targets.shape)
 
-            for j in range(targets.shape[0]):
-                if np.sum(targets[j]) == 0:
-                    neg +=1
-                count += 1
+            images_3chan = torch.FloatTensor(np.empty((images.shape[0], 3, images.shape[2], images.shape[3])))
+            # print(i, data[0].shape, images_3chan.shape)
+            for chan_idx in range(3):
+                images_3chan[:, chan_idx: chan_idx + 1, :, :] = images
+            # print ("train: ", images.shape, targets.shape, images_3chan.shape)
 
-    print(count, neg, neg/count)
-    #         images_3chan = torch.FloatTensor(np.empty((images.shape[0], 3, images.shape[2], images.shape[3])))
-    #         # print(i, data[0].shape, images_3chan.shape)
-    #         for chan_idx in range(3):
-    #             images_3chan[:, chan_idx: chan_idx + 1, :, :] = images
-    #         # print ("train: ", images.shape, targets.shape, images_3chan.shape)
-    #
-    #         images = Variable(images_3chan.cuda())
-    #         targets = Variable(targets.cuda())
-    #
-    #         outputs = model(images)
-    #
-    #         out_cut = np.copy(outputs.data.cpu().numpy())
-    #         out_cut[np.nonzero(out_cut < 0.5)] = 0.0
-    #         out_cut[np.nonzero(out_cut >= 0.5)] = 1.0
-    #
-    #         train_dice = dice_coef_metric(out_cut, targets.data.cpu().numpy())
-    #
-    #         if losstype == "dice_only":
-    #             loss = dice_coef_loss(outputs, targets)
-    #         else:
-    #             loss = bce_dice_loss(outputs, targets)
-    #
-    #         losses.append(loss.item())
-    #         accur.append(train_dice)
-    #
-    #         optimizer.zero_grad()
-    #         loss.backward()
-    #         optimizer.step()
-    #
-    #         if cntr % 10 == 0:
-    #             progress_bar.postfix[0] = f"loss: {np.mean(np.array(losses)):0.4f}"
-    #             progress_bar.postfix[1] = f"dice: {np.mean(np.array(accur)):0.4f}"
-    #             progress_bar.update()
-    #
-    #         if lr_scheduler is not None:
-    #             lr_scheduler.step()
-    #         cntr += 1
-    #
-    # print("Epoch [%d]" % (epoch))
-    # print("Mean loss on train:", np.array(losses).mean(), "Mean DICE on train:", np.array(accur).mean())
+            images = Variable(images_3chan.cuda())
+            targets = Variable(targets.cuda())
+
+            outputs = model(images)
+
+            out_cut = np.copy(outputs.data.cpu().numpy())
+            out_cut[np.nonzero(out_cut < 0.5)] = 0.0
+            out_cut[np.nonzero(out_cut >= 0.5)] = 1.0
+
+            train_dice = dice_coef_metric(out_cut, targets.data.cpu().numpy())
+
+            if losstype == "dice_only":
+                loss = dice_coef_loss(outputs, targets)
+            else:
+                loss = bce_dice_loss(outputs, targets)
+
+            losses.append(loss.item())
+            accur.append(train_dice)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            if cntr % 10 == 0:
+                progress_bar.postfix[0] = f"loss: {np.mean(np.array(losses)):0.4f}"
+                progress_bar.postfix[1] = f"dice: {np.mean(np.array(accur)):0.4f}"
+                progress_bar.update()
+
+            if lr_scheduler is not None:
+                lr_scheduler.step()
+            cntr += 1
+
+    print("Epoch [%d]" % (epoch))
+    print("Mean loss on train:", np.array(losses).mean(), "Mean DICE on train:", np.array(accur).mean())
 
 
 def val_epoch(model, optimizer, data_loader_valid, device, epoch):
@@ -147,6 +138,7 @@ def val_epoch(model, optimizer, data_loader_valid, device, epoch):
             cntr += 1
             images = valdata[0]
             targets = valdata[1]
+            image_ids = valdata[2]
 
             images_3chan = torch.FloatTensor(np.empty((images.shape[0], 3, images.shape[2], images.shape[3])))
 
@@ -159,6 +151,14 @@ def val_epoch(model, optimizer, data_loader_valid, device, epoch):
             outputs = model(images)
 
             out_cut = np.copy(outputs.data.cpu().numpy())
+
+            for i in range(outputs.shape[0]):
+                image_id = image_ids[i]
+                y_pred = out_cut[i, 0]
+                image_name = osp.join('/mnt/ssd2/dataset/pneumo/predictions/sx101_fold5_val', f'{image_id}.png')
+
+                cv2.imwrite(image_name, np.uint8(255 * y_pred))
+
             out_cut[np.nonzero(out_cut < threshold)] = 0.0
             out_cut[np.nonzero(out_cut >= threshold)] = 1.0
 
@@ -176,7 +176,7 @@ def mycol(x):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="pneumo segmentation")
-    parser.add_argument("--fold", help="fold id to train", default=0, type=int)
+    parser.add_argument("--fold", help="fold id to train", default=5, type=int)
     args = parser.parse_args()
     return args
 
@@ -191,19 +191,15 @@ if __name__ == "__main__":
     vloader = torch.utils.data.DataLoader(dataset_valid, batch_size=4, shuffle=False, num_workers=8)
 
     switch_grads = 1
-    num_classes = 1
+    num_classes = 2
     bestscore = 0.001
     device = torch.device("cuda:0")
 
-    model_name = f"sx50_fold{args.fold}_best.pth"
+    model_name = f"UnetSEResNext101_fold{args.fold}_best.pth"
     dst = "outs"
     os.makedirs(dst, exist_ok=True)
 
-    ################################################################################################
-    ################################ FROM SCRATCH ON 1024 ##########################################
-    ################################################################################################
-
-    model_ft = UnetSEResNext50()
+    model_ft = UnetSEResNext101()
     model_ft.to(device)
 
     for param in model_ft.parameters():
@@ -213,46 +209,10 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(params, lr=0.0001)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 4, 1e-6)
 
-    num_epochs = 30
-    for epoch in range(num_epochs):
-
-        train_one_epoch(model_ft, optimizer, tloader, device, epoch, print_freq=100)
-        valscore = val_epoch(model_ft, optimizer, vloader, device, epoch)
-
-        if valscore > bestscore:
-            bestscore = valscore
-            print("SAVE BEST MODEL! Epoch: ", epoch)
-            torch.save(model_ft, osp.join(dst, model_name))
-        lr_scheduler.step()
-
     model_ft = torch.load(osp.join(dst, model_name))
     optimizer = torch.optim.SGD(params, lr=0.0001, momentum=0.9)
     lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=1e-5, max_lr=2e-4)
 
     num_epochs = 20
     for epoch in range(num_epochs):
-
-        train_one_epoch(model_ft, optimizer, tloader, device, epoch + 30, print_freq=100)
         valscore = val_epoch(model_ft, optimizer, vloader, device, epoch + 30)
-
-        if valscore > bestscore:
-            bestscore = valscore
-            print("SAVE BEST MODEL! Epoch: ", epoch + 30)
-            torch.save(model_ft, osp.join(dst, model_name))
-        lr_scheduler.step()
-
-    model_ft = torch.load(osp.join(dst, model_name))
-    optimizer = torch.optim.Adam(params, lr=0.0001)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 4, 1e-6)
-
-    num_epochs = 20
-    for epoch in range(num_epochs):
-
-        train_one_epoch(model_ft, optimizer, tloader, device, epoch + 50, print_freq=100, losstype="dice_only")
-        valscore = val_epoch(model_ft, optimizer, vloader, device, epoch + 50)
-
-        if valscore > bestscore:
-            bestscore = valscore
-            print("SAVE BEST MODEL! Epoch: ", epoch + 45)
-            torch.save(model_ft, osp.join(dst, model_name))
-        lr_scheduler.step()
