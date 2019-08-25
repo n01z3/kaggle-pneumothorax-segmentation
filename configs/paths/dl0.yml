@@ -1,9 +1,9 @@
 dumps:
   path: '/media/n01z3/red3_2/learning_dumps/pneumo'
-  weights: 'weights'
+  weights: 'sota_weights'
   hard: 'hard_samples'
   logs: 'logs'
-  predictions: 'predictions'
+  predictions: '/mnt/ssd2/dataset/pneumo/predictions/sota_predictions'
   samples: 'samples'
 
 dataset:

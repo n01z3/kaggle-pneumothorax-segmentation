@@ -1,6 +1,6 @@
 dumps:
   path: '/mnt/hdd1/learning_dumps/pneumo'
-  weights: 'weights'
+  weights: 'sota_weights'
   hard: 'hard_samples'
   logs: 'logs'
   predictions: 'predictions'

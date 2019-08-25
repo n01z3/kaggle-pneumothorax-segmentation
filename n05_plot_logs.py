@@ -41,7 +41,7 @@ def plot_with_features(values, name, color=COLORS[0], title=None):
     if title:
         plt.title(title)
     plt.ylim(0.7, 0.86)
-    plt.xlim(0, 50)
+    plt.xlim(0, 65)
     plt.grid(True)
     # plt.ylabel('val dice')
     # plt.xlabel('epoch')

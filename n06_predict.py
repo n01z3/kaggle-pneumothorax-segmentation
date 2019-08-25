@@ -1,5 +1,7 @@
 __author__ = "n01z3"
 
+import argparse
+import gc
 import os
 import os.path as osp
 from multiprocessing import Pool
@@ -9,11 +11,16 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
+from n01_config import get_paths
 from n03_loss_metric import dice_coef_metric
 from n04_dataset import SIIMDataset_Unet
 
 DEVICE = torch.device("cuda:0")
 from torch.autograd import Variable
+
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
 
 
 def save_img(data):
@@ -38,7 +45,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
     os.makedirs(dst, exist_ok=True)
 
     dataset_valid = SIIMDataset_Unet(mode=mode, fold=fold)
-    vloader = torch.utils.data.DataLoader(dataset_valid, batch_size=2, shuffle=False, num_workers=8)
+    vloader = torch.utils.data.DataLoader(dataset_valid, batch_size=2, shuffle=False, num_workers=4)
 
     progress_bar = tqdm(enumerate(vloader), total=len(vloader), desc=f"Predicting {mode} {fold}")
 
@@ -50,20 +57,23 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
         batch1ch = torch.cat([images, mirror], dim=0)
         batch3ch = torch.FloatTensor(np.empty((batch1ch.shape[0], 3, batch1ch.shape[2], batch1ch.shape[3])))
         for chan_idx in range(3):
-            batch3ch[:, chan_idx : chan_idx + 1, :, :] = batch1ch
+            batch3ch[:, chan_idx: chan_idx + 1, :, :] = batch1ch
         images = Variable(batch3ch.cuda())
         targets = targets.data.cpu().numpy()
 
         preictions = model_ft(images)
         probability = preictions.data.cpu().numpy()
 
-        for j in range(2):
+        for j in range(targets.shape[0]):
             probabilityTTA = np.mean(
-                np.concatenate([probability[0 + j], probability[2 + j][:, :, ::-1]], axis=0), axis=0
+                np.concatenate([probability[0 + j], probability[targets.shape[0] + j][:, :, ::-1]], axis=0), axis=0
             )
             outputs.append(np.uint8(255 * probabilityTTA))
             filenames.append(osp.join(dst, f"{ids[j]}.png"))
-            gts.append(targets[j, 0])
+            gts.append(np.array(targets[j, 0] > 0.5))
+
+        if i % 50:
+            gc.collect()
 
     with Pool() as p:
         list(
@@ -79,26 +89,38 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
         scores = list(tqdm(p.imap_unordered(calc_score, zip(gts, outputs)), total=len(filenames), desc="calc score"))
     p.close()
 
-    # scores = []
-    # if validate:
-    #     for y_true, y_pred in zip(gts, outputs):
-    #         scores.append(dice_coef_metric(y_pred >= 128, y_true > 0.5))
-
     score = np.mean(scores)
     print(f"\n{model_name} fold{fold} {score:0.4f}\n")
     return score
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="pneumo segmentation")
+    parser.add_argument("--fold", help="fold id to predict", default=0, type=int)
+    args = parser.parse_args()
+    return args
+
+
 def main():
+    args = parse_args()
+    paths = get_paths()
+    weights_dir = osp.join(paths['dumps']['path'], paths['dumps']['weights'])
+    dumps_dir = osp.join(paths['dumps']['path'], paths['dumps']['predictions'])
+
     scores = []
-    for mode in ["test", "valid"]:
-        for fold in range(10):
+    for mode in ['test', 'valid']:
+        if args.fold >= 0:
+            lst = [args.fold]
+        else:
+            lst = list(range(8))
+
+        for fold in lst:
             score = predict_fold(
-                "sx50",
+                "sx101",
                 fold=fold,
                 mode=mode,
-                out_folder="/mnt/ssd2/dataset/pneumo/predictions/sota_predictions",
-                weights_dir="/media/n01z3/red3_2/learning_dumps/pneumo/sota_weights",
+                out_folder=dumps_dir,
+                weights_dir=weights_dir,
             )
             scores.append(score)
     print(scores[:10])
