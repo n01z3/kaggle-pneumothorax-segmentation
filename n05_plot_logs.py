@@ -21,7 +21,7 @@ def get_spaced_colors2(n):
 
 
 random.seed(42)
-COLORS = get_spaced_colors2(4)
+COLORS = get_spaced_colors2(6)
 
 
 def get_one_log(filename="logs_dl2/0fold_1.log", separator="Validation DICE score: "):
@@ -81,10 +81,17 @@ def main():
         mvalues.append(np.amax(tdice))
         names.append(f"sx50 fold{fold}")
         folds_scores[fold].append(tdice)
-
     print(f"sx50 {np.mean(mvalues):0.4f} +- {np.std(mvalues):0.4f}")
 
-    net_names = ["sx101", "sx50"]
+    mvalues = []
+    for fold in range(8):
+        tdice = get_one_log(f"logs/se154_logs/{fold}fold_1.log", "Validation DICE score: ")
+        mvalues.append(np.amax(tdice))
+        names.append(f"sx101 fold{fold}")
+        folds_scores[fold].append(tdice)
+    print(f"se154 {np.mean(mvalues):0.4f} +- {np.std(mvalues):0.4f}")
+
+    net_names = ["sx101", "sx50", "se154"]
 
     plt.figure(figsize=(15, 15))
     plt.subplot(3, 3, 1)

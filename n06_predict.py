@@ -49,7 +49,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
 
     progress_bar = tqdm(enumerate(vloader), total=len(vloader), desc=f"Predicting {mode} {fold}")
 
-    outputs, gts, filenames = [], [], []
+    outputs, gts, filenames, all_ids = [], [], [], []
     for i, batch in progress_bar:
         images, targets, ids = batch
 
@@ -68,22 +68,26 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
             probabilityTTA = np.mean(
                 np.concatenate([probability[0 + j], probability[targets.shape[0] + j][:, :, ::-1]], axis=0), axis=0
             )
-            outputs.append(np.uint8(255 * probabilityTTA))
+            # outputs.append(np.uint8(255 * probabilityTTA))
+            outputs.append(probabilityTTA)
             filenames.append(osp.join(dst, f"{ids[j]}.png"))
+            all_ids.append(ids[j])
             gts.append(np.array(targets[j, 0] > 0.5))
 
         if i % 50:
             gc.collect()
 
-    with Pool() as p:
-        list(
-            tqdm(
-                p.imap_unordered(save_img, zip(filenames, outputs)),
-                total=len(filenames),
-                desc="saving predictions to image",
-            )
-        )
-    p.close()
+    np.savez(dst + '.npz', outputs=np.array(outputs), ids=np.array(all_ids), gts=np.array(gts))
+
+    # with Pool() as p:
+    #     list(
+    #         tqdm(
+    #             p.imap_unordered(save_img, zip(filenames, outputs)),
+    #             total=len(filenames),
+    #             desc="saving predictions to image",
+    #         )
+    #     )
+    # p.close()
 
     with Pool() as p:
         scores = list(tqdm(p.imap_unordered(calc_score, zip(gts, outputs)), total=len(filenames), desc="calc score"))
