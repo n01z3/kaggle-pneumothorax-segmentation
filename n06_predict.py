@@ -30,7 +30,7 @@ def save_img(data):
 
 def calc_score(data):
     y_true, y_pred = data
-    return dice_coef_metric(y_pred >= 128, y_true > 0.5)
+    return dice_coef_metric(y_pred > 0.5, y_true > 0.5)
 
 
 @torch.no_grad()
@@ -41,7 +41,9 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
     model_ft.to(DEVICE)
     model_ft.eval()
 
-    dst = osp.join(out_folder, f"{fold}_{model_name}_{mode}")
+    name_pattern = f"{fold}_{model_name}_{mode}"
+
+    dst = osp.join(out_folder, model_name, name_pattern)
     os.makedirs(dst, exist_ok=True)
 
     dataset_valid = SIIMDataset_Unet(mode=mode, fold=fold)
@@ -49,7 +51,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
 
     progress_bar = tqdm(enumerate(vloader), total=len(vloader), desc=f"Predicting {mode} {fold}")
 
-    outputs, gts, filenames, all_ids = [], [], [], []
+    outputs, outputs_mirror, gts, filenames, all_ids = [], [], [], [], []
     for i, batch in progress_bar:
         images, targets, ids = batch
 
@@ -65,19 +67,35 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
         probability = preictions.data.cpu().numpy()
 
         for j in range(targets.shape[0]):
-            probabilityTTA = np.mean(
-                np.concatenate([probability[0 + j], probability[targets.shape[0] + j][:, :, ::-1]], axis=0), axis=0
-            )
+            # probabilityTTA = np.mean(
+            #     np.concatenate([probability[0 + j], probability[targets.shape[0] + j][:, :, ::-1]], axis=0), axis=0
+            # )
             # outputs.append(np.uint8(255 * probabilityTTA))
-            outputs.append(probabilityTTA)
+            # outputs.append(probabilityTTA)
+
+            predict1 = probability[0 + j]
+            predict1_mirror = probability[targets.shape[0] + j][:, :, ::-1]
+
+            outputs.append(predict1)
+            outputs_mirror.append(predict1_mirror)
+
             filenames.append(osp.join(dst, f"{ids[j]}.png"))
             all_ids.append(ids[j])
             gts.append(np.array(targets[j, 0] > 0.5))
 
-        if i % 50:
+        if i % 50 == 0 and i != 0:
+            np.savez(osp.join(dst, f'{name_pattern}_index{i}.npz'), outputs=np.array(outputs),
+                     outputs_mirror=np.array(outputs_mirror),
+                     ids=np.array(all_ids), gts=np.array(gts))
+            outputs = []
+            outputs_mirror = []
+            all_ids = []
+            gts = []
             gc.collect()
 
-    np.savez(dst + '.npz', outputs=np.array(outputs), ids=np.array(all_ids), gts=np.array(gts))
+    np.savez(osp.join(dst, f'{name_pattern}_index{i}.npz'), outputs=np.array(outputs),
+             outputs_mirror=np.array(outputs_mirror),
+             ids=np.array(all_ids), gts=np.array(gts))
 
     # with Pool() as p:
     #     list(
@@ -112,24 +130,35 @@ def main():
     dumps_dir = osp.join(paths['dumps']['path'], paths['dumps']['predictions'])
 
     scores = []
-    for mode in ['test', 'valid']:
-        if args.fold >= 0:
-            lst = [args.fold]
-        else:
-            lst = list(range(8))
+    for model in ['sx50', 'sx101']:
+        for mode in ['test', 'valid']:
+            if args.fold >= 0:
+                lst = [args.fold]
+            else:
+                lst = list(range(8))
 
-        for fold in lst:
-            score = predict_fold(
-                "sx50",
-                fold=fold,
-                mode=mode,
-                out_folder=dumps_dir,
-                weights_dir=weights_dir,
-            )
-            scores.append(score)
-    print(scores[:10])
-    print(scores[-10:])
+            for fold in lst:
+                score = predict_fold(
+                    model,
+                    fold=fold,
+                    mode=mode,
+                    out_folder=dumps_dir,
+                    weights_dir=weights_dir,
+                )
+                scores.append(score)
+        print(scores[:10])
+        print(scores[-10:])
+
+
+def check_prdictions():
+    filename = '/mnt/hdd2/learning_dumps/pneumo/predictions/0_sx50_test_index50.npz'
+    tfz = np.load(filename)
+    outputs, outputs_mirror, ids, gts = tfz['outputs'], tfz['outputs_mirror'], tfz['ids'], tfz['gts']
+    # ids = np.array(all_ids), gts = np.array(gts)
+
+    print(outputs_mirror.shape, outputs.shape, ids.shape, gts.shape)
 
 
 if __name__ == "__main__":
     main()
+    # check_prdictions()

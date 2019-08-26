@@ -24,7 +24,7 @@ random.seed(42)
 COLORS = get_spaced_colors2(6)
 
 
-def get_one_log(filename="logs_dl2/0fold_1.log", separator="Validation DICE score: "):
+def get_one_log(filename="sx50/0fold_1.log", separator="Validation DICE score: "):
     with open(filename) as f:
         content = f.readlines()
 
@@ -60,38 +60,17 @@ def main():
     dices = [get_one_log("logs/ref_8710.log", separator="Validation loss: ")]
     names = ["ref dice 8710LB sota log"]
     folds_scores = [[] for _ in range(10)]
+    net_names = ["sx50", "sx101", "se154"]
 
     mvalues = []
-    for fold in range(8):
-        tdice = get_one_log(f"logs/logs_dgx/{fold}fold_1.log", "Validation DICE score: ")
-        mvalues.append(np.amax(tdice))
-        names.append(f"sx101 fold{fold}")
-        folds_scores[fold].append(tdice)
-    print(f"sx101 {np.mean(mvalues):0.4f} +- {np.std(mvalues):0.4f}")
-
-    mvalues = []
-    for fold in range(6):
-        tdice = get_one_log(f"logs/logs_dl2/{fold}fold_1.log", "Validation DICE score: ")
-        mvalues.append(np.amax(tdice))
-        names.append(f"sx50 fold{fold}")
-        folds_scores[fold].append(tdice)
-
-    for fold in range(6, 8):
-        tdice = get_one_log(f"logs/logs_dl6/{fold}fold_1.log", "Validation DICE score: ")
-        mvalues.append(np.amax(tdice))
-        names.append(f"sx50 fold{fold}")
-        folds_scores[fold].append(tdice)
-    print(f"sx50 {np.mean(mvalues):0.4f} +- {np.std(mvalues):0.4f}")
-
-    mvalues = []
-    for fold in range(8):
-        tdice = get_one_log(f"logs/se154_logs/{fold}fold_1.log", "Validation DICE score: ")
-        mvalues.append(np.amax(tdice))
-        names.append(f"sx101 fold{fold}")
-        folds_scores[fold].append(tdice)
-    print(f"se154 {np.mean(mvalues):0.4f} +- {np.std(mvalues):0.4f}")
-
-    net_names = ["sx101", "sx50", "se154"]
+    for model in net_names:
+        mvalues = []
+        for fold in range(8):
+            tdice = get_one_log(f"logs/{model}/{fold}fold_1.log", "Validation DICE score: ")
+            mvalues.append(np.amax(tdice))
+            names.append(f"sx101 fold{fold}")
+            folds_scores[fold].append(tdice)
+        print(f"{model} {np.mean(mvalues):0.4f} +- {np.std(mvalues):0.4f}")
 
     plt.figure(figsize=(15, 15))
     plt.subplot(3, 3, 1)
