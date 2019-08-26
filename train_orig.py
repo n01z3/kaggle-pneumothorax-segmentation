@@ -15,7 +15,7 @@ from tqdm import tqdm
 from n02_utils import warmup_lr_scheduler
 from n03_loss_metric import dice_coef_loss, bce_dice_loss
 from n03_loss_metric import dice_coef_metric_batch as dice_coef_metric
-from n03_zoo import UnetSENet154
+from n03_zoo import get_hypermodel
 from n04_dataset import SIIMDataset_Unet
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     bestscore = 0.001
     device = torch.device("cuda:0")
 
-    model_name = f"se154_fold{args.fold}_best.pth"
+    model_name = f"sx50hyper_fold{args.fold}_best.pth"
     dst = "outs"
     os.makedirs(dst, exist_ok=True)
 
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     ################################ FROM SCRATCH ON 1024 ##########################################
     ################################################################################################
 
-    model_ft = UnetSENet154()
+    model_ft = get_hypermodel('UNetResNextHyperSE50')
     model_ft.to(device)
 
     for param in model_ft.parameters():

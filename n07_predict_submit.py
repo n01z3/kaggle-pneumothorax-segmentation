@@ -38,12 +38,12 @@ torch.backends.cudnn.deterministic = True
 
 
 def flip(x, dim):
-	xsize = x.size()
-	dim = x.dim() + dim if dim < 0 else dim
-	x = x.view(-1, *xsize[dim:])
-	x = x.view(x.size(0), x.size(1), -1)[:, getattr(torch.arange(x.size(1)-1, 
-		-1, -1), ('cpu','cuda')[x.is_cuda])().long(), :]
-	return x.view(xsize)
+    xsize = x.size()
+    dim = x.dim() + dim if dim < 0 else dim
+    x = x.view(-1, *xsize[dim:])
+    x = x.view(x.size(0), x.size(1), -1)[:, getattr(torch.arange(x.size(1)-1, 
+        -1, -1), ('cpu','cuda')[x.is_cuda])().long(), :]
+    return x.view(xsize)
 
 
 def val_epoch(model, data_loader_valid, threshold=0.5):
@@ -81,13 +81,13 @@ def val_epoch(model, data_loader_valid, threshold=0.5):
             outputs = model(images)
 
             #hflip
-			aug_images = flip(images,3)
-			#predict TTA
+            aug_images = flip(images,3)
+            #predict TTA
             aug_outputs = model(aug_images)
             #hflip back to orig
             aug_outputs = flip(aug_outputs,3)
 
-			mean_outs = torch.mean(torch.stack([outputs, aug_outputs], dim=1),dim=1)
+            mean_outs = torch.mean(torch.stack([outputs, aug_outputs], dim=1),dim=1)
 
             out_cut = np.copy(mean_outs.data.cpu().numpy())
             out_cut[np.nonzero(out_cut < threshold)] = 0.0
@@ -108,7 +108,7 @@ def val_epoch(model, data_loader_valid, threshold=0.5):
 def make_predictions(model, data_loader_test, threshold=0.5, model_name, fold):
     print("START predictions")
     
-	sublist = []
+    sublist = []
 
     progress_bar_valid = tqdm(
         enumerate(data_loader_test),
@@ -133,42 +133,42 @@ def make_predictions(model, data_loader_test, threshold=0.5, model_name, fold):
             outputs = model(images)
 
             #hflip
-			aug_images = flip(images,3)
-			#predict TTA
+            aug_images = flip(images,3)
+            #predict TTA
             aug_outputs = model(aug_images)
             #hflip back to orig
             aug_outputs = flip(aug_outputs,3)
 
-			mean_outs = torch.mean(torch.stack([outputs, aug_outputs], dim=1),dim=1)
+            mean_outs = torch.mean(torch.stack([outputs, aug_outputs], dim=1),dim=1)
 
             out_cut = np.copy(mean_outs.data.cpu().numpy())
             out_cut[np.nonzero(out_cut < threshold)] = 0.0
             out_cut[np.nonzero(out_cut >= threshold)] = 1.0
 
             for jj in range(BATCH_SIZE):
-            	one_cut = out_cut[jj,0,::]
-            	image_id = image_ids[jj]
+                one_cut = out_cut[jj,0,::]
+                image_id = image_ids[jj]
 
-				one_cut, nr_objects = ndimage.label(one_cut)
+                one_cut, nr_objects = ndimage.label(one_cut)
 
-				for ii in range(1, nr_objects+1):
-					if (one_cut[one_cut==ii].sum() / ii) < SMALL_OBJ_THRESHOLD:
-						one_cut[np.nonzero(one_cut==ii)] = 0.
+                for ii in range(1, nr_objects+1):
+                    if (one_cut[one_cut==ii].sum() / ii) < SMALL_OBJ_THRESHOLD:
+                        one_cut[np.nonzero(one_cut==ii)] = 0.
 
-				one_cut[np.nonzero(one_cut!=0)] = 1.
+                one_cut[np.nonzero(one_cut!=0)] = 1.
 
-				## fill
-				one_cut = ndimage.binary_fill_holes(one_cut).astype(one_cut.dtype)
-				one_cut = ndimage.binary_dilation(one_cut, iterations=2).astype(one_cut.dtype)
+                ## fill
+                one_cut = ndimage.binary_fill_holes(one_cut).astype(one_cut.dtype)
+                one_cut = ndimage.binary_dilation(one_cut, iterations=2).astype(one_cut.dtype)
 
-				if one_cut.sum() > 0:
-					rle = mask_to_rle(one_cut, 1024, 1024)
-				else:
-					rle = " -1"
-				sublist.append([image_id, rle])
+                if one_cut.sum() > 0:
+                    rle = mask_to_rle(one_cut, 1024, 1024)
+                else:
+                    rle = " -1"
+                sublist.append([image_id, rle])
 
-		submission_df = pd.DataFrame(sublist, columns=['ImageId', 'EncodedPixels'])
-		submission_df.to_csv(f"submission_{model_name}_fold{fold}_best_threshold_{threshold}.pth", index=False)		
+        submission_df = pd.DataFrame(sublist, columns=['ImageId', 'EncodedPixels'])
+        submission_df.to_csv(f"submission_{model_name}_fold{fold}_best_threshold_{threshold}.pth", index=False)        
 
     return 0
 
@@ -180,8 +180,8 @@ def parse_args():
     return args
 
 if __name__ == "__main__":
-	args = parse_args()
-	device = torch.device("cuda:0")
+    args = parse_args()
+    device = torch.device("cuda:0")
 
     dataset_valid = SIIMDataset_Unet(mode="valid", fold=args.fold)
     vloader = torch.utils.data.DataLoader(
@@ -197,21 +197,21 @@ if __name__ == "__main__":
     dst = "outs"
     os.makedirs(dst, exist_ok=True)
 
-	model_ft = torch.load(model_dict)
-	model_ft.to(device)
-	model_ft.eval()    
+    model_ft = torch.load(model_dict)
+    model_ft.to(device)
+    model_ft.eval()    
 
 ### TODO : make more precise step after first check around best value
-	thresholds = np.linspace(0.05, 0.95, num=19) 
+    thresholds = np.linspace(0.05, 0.95, num=19) 
 
-	val_dice_list = {}
-	
-	for threshold in thresholds:
-		val_dice_list[threshold]=val_epoch(model_ft, vloader, threshold)
+    val_dice_list = {}
+    
+    for threshold in thresholds:
+        val_dice_list[threshold]=val_epoch(model_ft, vloader, threshold)
 
-	best_val_th = max(val_dice_list, key=val_dice_list.get)
-	print ("Best threshold: ", best_val_th)
-	print (" with val DICE score: ", val_dice_list[best_val_th])
+    best_val_th = max(val_dice_list, key=val_dice_list.get)
+    print ("Best threshold: ", best_val_th)
+    print (" with val DICE score: ", val_dice_list[best_val_th])
 
-	make_predictions(model_ft, testloader, best_val_th, args.model_name, args.fold)
+    make_predictions(model_ft, testloader, best_val_th, args.model_name, args.fold)
 
