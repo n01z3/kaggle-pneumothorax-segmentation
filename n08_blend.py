@@ -26,6 +26,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 
 NCORE = 18
 
+
 def read_prediction(filename):
     return cv2.imread(filename, 0) / 255.0
 
@@ -187,7 +188,7 @@ def random_search():
         mask_thresh = random.choice(mask_threshs)
         dilation = random.choice(dilations)
         if n == 0:
-            size, mask_thresh, dilation = 2, 0.5, 1000 # sx101
+            size, mask_thresh, dilation = 2, 0.5, 1000  # sx101
 
         iter_scores = []
         for y_preds, y_trues in folds:
@@ -202,7 +203,7 @@ def random_search():
             print(string_sep)
             string_sep = string_sep[:-1] + "=>"
         else:
-            print('not better', iter_scores)
+            print("not better", iter_scores)
 
         # gc.collect()
         # score_fold(y_preds, y_trues, ids)

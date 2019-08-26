@@ -62,7 +62,8 @@ def main():
     folds_scores = [[] for _ in range(10)]
     net_names = ["sx50", "sx101", "se154"]
 
-    mvalues = []
+    plt.figure(figsize=(15, 15))
+    out_string = ""
     for model in net_names:
         mvalues = []
         for fold in range(8):
@@ -70,13 +71,9 @@ def main():
             mvalues.append(np.amax(tdice))
             names.append(f"sx101 fold{fold}")
             folds_scores[fold].append(tdice)
-        print(f"{model} {np.mean(mvalues):0.4f} +- {np.std(mvalues):0.4f}")
+        out_string += f"8folds {model}: {np.mean(mvalues):0.4f}" + "\u00B1" + f"{np.std(mvalues):0.4f}\n"
 
-    plt.figure(figsize=(15, 15))
-    plt.subplot(3, 3, 1)
-    line1 = plot_with_features(dices[0], names[0], color=COLORS[-1])
-    plt.legend(handler_map={line1: HandlerLine2D(numpoints=3)}, fontsize="medium", loc=3)
-
+    print(out_string)
     for fold in range(8):
         plt.subplot(3, 3, 2 + fold)
         fold_lst = folds_scores[fold]
@@ -84,6 +81,10 @@ def main():
             line1 = plot_with_features(values, net_name, COLORS[2 * z], f"{fold} fold")
         plt.legend(handler_map={line1: HandlerLine2D(numpoints=3)}, fontsize="medium", loc=4)
         plt.grid(True)
+
+    plt.subplot(3, 3, 1)
+    line1 = plot_with_features(dices[0], f"{out_string}" + "1fold ref", color=COLORS[1], title=names[0])
+    plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, fontsize="medium", loc=4)
     plt.show()
 
 

@@ -41,8 +41,8 @@ def binarize_sample(data):
 
 
 def convert_one(sample_id):
-    if '+' in model_name:
-        model_lst = model_name.split('+')
+    if "+" in model_name:
+        model_lst = model_name.split("+")
     else:
         model_lst = [model_name]
 
@@ -78,13 +78,13 @@ def main():
     df = pd.read_csv("tables/sample_submission.csv")
 
     with Pool() as p:
-        rles = p.map(convert_one, df['ImageId'])
+        rles = p.map(convert_one, df["ImageId"])
 
     df["EncodedPixels"] = rles
-    os.makedirs('subm', exist_ok=True)
-    df.to_csv(f'subm/{model_name}_nf{n_fold}_{mask_thresh}_{min_size_thresh}_{dilation}.csv', index=False)
+    os.makedirs("subm", exist_ok=True)
+    df.to_csv(f"subm/{model_name}_nf{n_fold}_{mask_thresh}_{min_size_thresh}_{dilation}.csv", index=False)
 
-    empty = df[df['EncodedPixels'] == ' -1']
+    empty = df[df["EncodedPixels"] == " -1"]
     print(f"empty {empty.shape[0] / df.shape[0]}")
 
 
