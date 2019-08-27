@@ -22,7 +22,7 @@ from n04_dataset import SIIMDataset_Unet
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-IMG_SIZE = 1024
+IMG_SIZE = 224
 
 MODELS = {"sx50": UnetSEResNext50(), "sx101": UnetSEResNext101(), "se154": UnetSENet154(), 
             "sx101hyper": get_hypermodel('UNetResNextHyperSE101')}
@@ -170,7 +170,7 @@ def mycol(x):
 def parse_args():
     parser = argparse.ArgumentParser(description="pneumo segmentation")
     parser.add_argument("--fold", help="fold id to train", default=0, type=int)
-    parser.add_argument("--model", help="model arch", default="se154", type=str)
+    parser.add_argument("--net", help="net arch", default="se154", type=str)
     args = parser.parse_args()
     return args
 
