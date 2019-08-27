@@ -64,3 +64,64 @@ Epoch [14]
 Mean loss on train: 0.4483866434811822 Mean DICE on train: 0.7015407467095659
 START validation
 Epoch:  14  Threshold:  0.5  Validation DICE score: 0.8319059632549397
+Epoch [15]
+Mean loss on train: 0.4790514863052713 Mean DICE on train: 0.671696435217036
+START validation
+Epoch:  15  Threshold:  0.5  Validation DICE score: 0.8078601043989654
+Epoch [16]
+Mean loss on train: 0.5005426037490992 Mean DICE on train: 0.6446464706059244
+START validation
+Epoch:  16  Threshold:  0.5  Validation DICE score: 0.6890112422387332
+Epoch [17]
+Mean loss on train: 0.4885435715111414 Mean DICE on train: 0.6594771006145986
+START validation
+Epoch:  17  Threshold:  0.5  Validation DICE score: 0.7659019432004296
+Epoch [18]
+Mean loss on train: 0.45110351549827776 Mean DICE on train: 0.696063466738648
+START validation
+Epoch:  18  Threshold:  0.5  Validation DICE score: 0.8194314628850027
+Epoch [19]
+Mean loss on train: 0.4061621863628053 Mean DICE on train: 0.7277273067770459
+START validation
+Epoch:  19  Threshold:  0.5  Validation DICE score: 0.8359117447292201
+Epoch [20]
+Mean loss on train: 0.3933748430641074 Mean DICE on train: 0.7438718661840339
+START validation
+Epoch:  20  Threshold:  0.5  Validation DICE score: 0.8368185087164335
+Epoch [21]
+Mean loss on train: 0.3936077230828005 Mean DICE on train: 0.743765385168813
+START validation
+Epoch:  21  Threshold:  0.5  Validation DICE score: 0.8458159868836179
+SAVE BEST MODEL! Epoch:  21
+Epoch [22]
+Mean loss on train: 0.41924925136735386 Mean DICE on train: 0.7263230947366267
+START validation
+Epoch:  22  Threshold:  0.5  Validation DICE score: 0.8358422452582318
+Epoch [23]
+Mean loss on train: 0.45410137697507913 Mean DICE on train: 0.7000686462365326
+START validation
+Epoch:  23  Threshold:  0.5  Validation DICE score: 0.8231071930698918
+Epoch [24]
+Mean loss on train: 0.47247873614743174 Mean DICE on train: 0.6841132828978218
+START validation
+Epoch:  24  Threshold:  0.5  Validation DICE score: 0.6474756266269382
+Epoch [25]
+Mean loss on train: 0.4634026830857174 Mean DICE on train: 0.6813932628434788
+START validation
+Epoch:  25  Threshold:  0.5  Validation DICE score: 0.8117982910687144
+Epoch [26]
+Mean loss on train: 0.4294388621460002 Mean DICE on train: 0.7172424936392905
+START validation
+Epoch:  26  Threshold:  0.5  Validation DICE score: 0.8185521675070345
+Epoch [27]
+Mean loss on train: 0.39705370939907975 Mean DICE on train: 0.7440915795912061
+START validation
+Epoch:  27  Threshold:  0.5  Validation DICE score: 0.8410600257640501
+Epoch [28]
+Mean loss on train: 0.38216432649938514 Mean DICE on train: 0.7562325473406576
+START validation
+Epoch:  28  Threshold:  0.5  Validation DICE score: 0.8359280723096805
+Epoch [29]
+Mean loss on train: 0.37750144245427325 Mean DICE on train: 0.7548922863512241
+START validation
+Epoch:  29  Threshold:  0.5  Validation DICE score: 0.8342190705293072

@@ -4,6 +4,7 @@ import os
 import os.path as osp
 import random
 import warnings
+from glob import glob
 
 import numpy as np
 import torch
@@ -15,7 +16,7 @@ from tqdm import tqdm
 from n02_utils import warmup_lr_scheduler
 from n03_loss_metric import dice_coef_loss, bce_dice_loss
 from n03_loss_metric import dice_coef_metric_batch as dice_coef_metric
-from n03_zoo import get_hypermodel
+from n03_zoo import UnetSENet154, UnetSEResNext101, UnetSEResNext50
 from n04_dataset import SIIMDataset_Unet
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -23,24 +24,30 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 IMG_SIZE = 1024
 
-seed = 486
+MODELS = {"sx50": UnetSEResNext50(), "sx101": UnetSEResNext101(), "se154": UnetSENet154()}
+SEED = 486
 
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 
-random.seed(seed)
-os.environ["PYTHONHASHSEED"] = str(seed)
-np.random.seed(seed)
+random.SEED(SEED)
+os.environ["PYTHONHASHSEED"] = str(SEED)
+np.random.SEED(SEED)
 
 if torch.cuda.is_available:
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+    torch.manual_SEED(SEED)
+    torch.cuda.manual_SEED(SEED)
+    torch.cuda.manual_SEED_all(SEED)
 else:
     print("ERROR: CUDA is not available. Exit")
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
+
+
+def select_best_checkpoint(folder, fold, model):
+    fns = sorted(glob(osp.join(folder, f"*{model}_fold{fold}*.pth")))
+    return fns[-1]
 
 
 def mkdir(path):
@@ -167,6 +174,7 @@ def mycol(x):
 def parse_args():
     parser = argparse.ArgumentParser(description="pneumo segmentation")
     parser.add_argument("--fold", help="fold id to train", default=0, type=int)
+    parser.add_argument("--net", help="net arch", default="se154", type=str)
     args = parser.parse_args()
     return args
 
@@ -186,7 +194,7 @@ if __name__ == "__main__":
     bestscore = 0.001
     device = torch.device("cuda:0")
 
-    model_name = f"sx50hyper_fold{args.fold}_best.pth"
+    model_name = f"{args.net}_fold{args.fold}_best.pth"
     dst = "outs"
     os.makedirs(dst, exist_ok=True)
 
@@ -194,7 +202,7 @@ if __name__ == "__main__":
     ################################ FROM SCRATCH ON 1024 ##########################################
     ################################################################################################
 
-    model_ft = get_hypermodel('UNetResNextHyperSE50')
+    model_ft = MODELS.get(args.net)  # get_hypermodel('UNetResNextHyperSE50')
     model_ft.to(device)
 
     for param in model_ft.parameters():
@@ -216,7 +224,9 @@ if __name__ == "__main__":
             torch.save(model_ft, osp.join(dst, f"{valscore:0.5f}_{model_name}"))
         lr_scheduler.step()
 
-    model_ft = torch.load(osp.join(dst, model_name))
+    checkpoint = select_best_checkpoint(dst, args.fold, args.net)
+    print(f"fold{args.fold} loaded {checkpoint}")
+    model_ft = torch.load(checkpoint)
     optimizer = torch.optim.SGD(params, lr=0.0001, momentum=0.9)
     lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=1e-5, max_lr=2e-4)
 
@@ -232,7 +242,10 @@ if __name__ == "__main__":
             torch.save(model_ft, osp.join(dst, f"{valscore:0.5f}_{model_name}"))
         lr_scheduler.step()
 
-    model_ft = torch.load(osp.join(dst, model_name))
+    checkpoint = select_best_checkpoint(dst, args.fold, args.net)
+    print(f"fold{args.fold} loaded {checkpoint}")
+    model_ft = torch.load(checkpoint)
+
     optimizer = torch.optim.Adam(params, lr=0.0001)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 4, 1e-6)
 
