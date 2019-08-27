@@ -1,0 +1,21 @@
+train 10428
+valid 1154
+fold4 loaded outs/0.83561_se154_fold4_best.pth
+Epoch [30]
+Mean loss on train: 0.3727464836063469 Mean DICE on train: 0.7694671653374356
+START validation
+Epoch:  30  Threshold:  0.5  Validation DICE score: 0.8381728903266635
+SAVE BEST MODEL! Epoch:  30
+Epoch [31]
+Mean loss on train: 0.3768795541566133 Mean DICE on train: 0.7675044993675995
+START validation
+Epoch:  31  Threshold:  0.5  Validation DICE score: 0.8380167956213987
+SAVE BEST MODEL! Epoch:  31
+Epoch [32]
+Mean loss on train: 0.37741664746870096 Mean DICE on train: 0.7597636861857836
+START validation
+Epoch:  32  Threshold:  0.5  Validation DICE score: 0.8370635487962905
+Epoch [33]
+Mean loss on train: 0.3777746112618558 Mean DICE on train: 0.7557436239350841
+START validation
+Epoch:  33  Threshold:  0.5  Validation DICE score: 0.8365601186362435

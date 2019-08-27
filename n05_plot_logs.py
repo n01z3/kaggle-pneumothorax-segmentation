@@ -27,8 +27,13 @@ COLORS = get_spaced_colors2(6)
 def get_one_log(filename="sx50/0fold_1.log", separator="Validation DICE score: "):
     with open(filename) as f:
         content = f.readlines()
-
     content = [x.strip() for x in content]
+    if 'se154' in filename:
+        filename = filename.replace('/se154/', '/se154_p2/')
+        with open(filename) as f:
+            content2 = f.readlines()
+        content += [x.strip() for x in content2]
+
     dices = []
     for row in content:
         if "Val" in row:
