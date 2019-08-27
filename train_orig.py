@@ -16,7 +16,7 @@ from tqdm import tqdm
 from n02_utils import warmup_lr_scheduler, select_best_checkpoint
 from n03_loss_metric import dice_coef_loss, bce_dice_loss
 from n03_loss_metric import dice_coef_metric_batch as dice_coef_metric
-from n03_zoo import UnetSENet154, UnetSEResNext101, UnetSEResNext50
+from n03_zoo import UnetSENet154, UnetSEResNext101, UnetSEResNext50, get_hypermodel
 from n04_dataset import SIIMDataset_Unet
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -24,7 +24,8 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 IMG_SIZE = 1024
 
-MODELS = {"sx50": UnetSEResNext50(), "sx101": UnetSEResNext101(), "se154": UnetSENet154()}
+MODELS = {"sx50": UnetSEResNext50(), "sx101": UnetSEResNext101(), "se154": UnetSENet154(), 
+            "sx101hyper": get_hypermodel('UNetResNextHyperSE101')}
 SEED = 486
 
 os.environ["MKL_NUM_THREADS"] = "1"
