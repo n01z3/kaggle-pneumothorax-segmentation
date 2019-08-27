@@ -6,7 +6,27 @@ import cv2
 import numpy as np
 from torch import nn
 from tqdm import tqdm
+from skimage import morphology
 
+def dice_coef_metric_agreement(outputs, targets, threshold, dilation=0):
+    scores = []
+    for i in range(outputs.shape[0]):
+        output = np.copy(outputs[i])
+        target = np.copy(targets[i])
+
+        if np.sum(output) > threshold:
+            output[:]=0.
+
+        if dilation:
+            output = morphology.dilation(output, morphology.disk(dilation))
+
+        intersection = 2.0 * (target * output).sum()
+        union = target.sum() + output.sum()
+        if target.sum() == 0 and output.sum() == 0:
+            scores.append(1.0)
+        else:
+            scores.append(intersection / union)
+    return np.mean(scores)
 
 def dice_coef_metric_batch(outputs, targets):
     scores = []

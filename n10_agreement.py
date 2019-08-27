@@ -1,11 +1,12 @@
-__author__ = "n01z3"
+__author__ = "n01z3, bobbqe"
 
 import os
 import os.path as osp
 
 import matplotlib.pyplot as plt
 import numpy as np
-
+from scipy import ndimage
+from n03_loss_metric import dice_coef_metric_batch, dice_coef_metric_agreement
 
 def eda():
     filename = "/mnt/hdd2/learning_dumps/pneumo/predictions/0_sx50_test_index50.npz"
@@ -136,6 +137,47 @@ def read_top_disagre():
     print(names)
 
 
+def check_heuristics(fold=0):
+    tfz = np.load(f"/mnt/ssd2/dataset/pneumo/predictions/top_disagree/{fold}_top20.npz")
+    y_preds, y_gts, ids, names = tfz["top_preds"], tfz["top_gts"], tfz["top_ids"], tfz["desc"]
+    
+    y_preds = y_preds/255.
+    y_pred_mean = y_preds.mean(axis=0)
+    y_pred_max = y_preds.max(axis=0)
+    y_pred_sum = np.clip(y_preds.sum(axis=0),0,1)
+    bestdicescore = 0
+
+    for variant, varname in zip([y_pred_mean, y_pred_sum, y_pred_max],['mean','sum','max']):
+        dicescore = dice_coef_metric_batch(variant > 0.5, y_gts)
+        # print (f"\nDicescore on BASE {varname} vs GT            : {dicescore}")
+
+        if dicescore > bestdicescore:
+            bestdicescore = dicescore
+            best_setup = f"Type: {varname} Threshold: {0}  Dilation: No"
+
+        sum_list, check_th_list = [], {}
+        for jj in range(variant.shape[0]):
+            sum_list.append(variant[jj].sum())
+
+        for ii in range(1,8):
+            check_th_list[f"{ii}/{ii+1}"] = (np.max(sum_list)*ii/(ii+1))
+
+        # print (f"Check with {varname} over TTA")
+        for cut_th in check_th_list:
+            for idx in range(3):
+                dicescore = dice_coef_metric_agreement(variant > 0.5, y_gts, check_th_list[cut_th], dilation=idx)
+                # print (f"Dicescore on {varname} vs GT with threshold {cut_th} * max_mask. Dilation: {idx}     :   {dicescore}")
+                if dicescore > bestdicescore:
+                    bestdicescore = dicescore
+                    best_setup = f"Type: {varname} Threshold: {cut_th} * max_mask. Dilation: {idx}"
+
+
+    print (f"Fold {fold}. Final best DICE: {bestdicescore}")
+    print (f"with {best_setup}")
+
+
 if __name__ == "__main__":
     # score_select_top()
-    read_top_disagre()
+    # read_top_disagre()
+    for fold in range(8):
+        check_heuristics(fold=fold)
