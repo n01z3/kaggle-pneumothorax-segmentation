@@ -15,7 +15,7 @@ from skimage import measure, morphology
 from tqdm import tqdm
 
 from n01_config import get_paths
-from n03_loss_metric import dice_coef_metric
+from n03_loss_metric import dice_coef_metric, dice_coef_metric_batch
 from n04_dataset import SIIMDataset_Unet
 
 # DEVICE = torch.device("cuda:0")
@@ -25,6 +25,8 @@ os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 
 NCORE = 18
+PATHS = get_paths()
+PREDICTS = PATHS["dumps"]["predictions"]
 
 
 def read_prediction(filename):
@@ -63,17 +65,21 @@ def get_data(model_name="sx101", fold=0):
     return y_preds, y_trues, scores, ids
 
 
-def dump_data():
-    model = "sx101"
+def get_data_npz(model_name="sx101", fold=0):
+    mode = "valid"
+    name_pattern = f"{fold}_{model_name}_{mode}"
 
-    os.makedirs("tmp", exist_ok=True)
-    scores = []
-    for i in range(0, 8):
-        y_preds, y_trues, score = get_data(model_name=model, fold=i)
-        np.savez(f"tmp/{model}_{i}_val", y_preds=y_preds, y_trues=y_trues, score=score)
-        scores.append(score)
+    filename = osp.join(PREDICTS, model_name, name_pattern, f"{name_pattern}_index.npz")
+    tfz = np.load(filename)
 
-    print(scores)
+    outputs, outputs_mirror, ids, gts = tfz["outputs"], tfz["outputs_mirror"], tfz["ids"], tfz["gts"]
+    print(outputs.shape, outputs_mirror.shape, gts.shape)
+    y_preds = np.mean(np.concatenate([outputs_mirror, outputs], axis=1), axis=1) / 255.0
+    print(y_preds.shape)
+    score = dice_coef_metric_batch(y_preds > 0.5, gts > 0.5)
+    print(model_name, fold, score)
+    gc.collect()
+    return y_preds, gts, score, ids
 
 
 def eda_fold(y_preds, y_trues, ids, mask_thresh=0.5, min_size_thresh=1500, max_size_thresh=50000, dilation=2):
@@ -149,6 +155,11 @@ def score_sample(data):
 
 def score_fold(y_preds, y_trues, mask_thresh=0.5, min_size_thresh=1500, dilation=2):
     total = len(y_trues)
+
+    # with Pool() as p:
+    #     scores = p.map(score_sample,
+    #                    zip(y_preds, y_trues, total * [mask_thresh], total * [min_size_thresh], total * [dilation]))
+
     with Pool(NCORE) as p:
         scores = list(
             tqdm(
@@ -164,46 +175,52 @@ def score_fold(y_preds, y_trues, mask_thresh=0.5, min_size_thresh=1500, dilation
 
 
 def random_search():
-    model = "sx50"
+    model = "sx101"
     folds = []
-    n_folds = 5
+    n_folds = 2
     string_sep = "8===>"
 
-    sizes = [500, 1000, 1500, 2000, 2500]
-    mask_threshs = [0.4, 0.45, 0.5, 0.55, 0.60]
+    # sizes = [500, 1000, 1500, 2000, 2500]
+    # mask_threshs = [0.4, 0.45, 0.5, 0.55, 0.60]
     dilations = [0, 1, 2, 3]
 
-    base_scores = []
+    y_preds, y_trues, base_scores = [], [], []
     for i in range(n_folds):
-        y_preds, y_trues, scores, ids = get_data(model, fold=i)
+        ty_preds, ty_trues, scores, ids = get_data_npz(model, fold=i)
         base_scores.append(np.mean(scores))
-        folds.append((y_preds, y_trues))
+        # folds.append((y_preds, y_trues))
+        y_preds.append(ty_preds.astype(np.float32))
+        y_trues.append(ty_trues.astype(np.float32))
+
+    y_preds = np.concatenate(y_preds, axis=0).astype(np.float32)
+    y_trues = np.concatenate(y_trues, axis=0).astype(np.float32)
 
     best_score = np.mean(base_scores)
     print("base_score", best_score)
-    # gc.collect()
+    gc.collect()
 
+    best_combo = ()
     for n in range(1000):
-        size = random.choice(sizes)
-        mask_thresh = random.choice(mask_threshs)
+        size = random.randint(500, 2500)
+        mask_thresh = random.uniform(0.42, 0.58)
         dilation = random.choice(dilations)
         if n == 0:
-            size, mask_thresh, dilation = 2, 0.5, 1000  # sx101
+            size, mask_thresh, dilation = 1000, 0.5, 0  # sx101
 
         iter_scores = []
-        for y_preds, y_trues in folds:
-            tscore = score_fold(y_preds, y_trues, mask_thresh, size, dilation)
-            iter_scores.append(tscore)
+        # for y_preds, y_trues in folds:
+        iter_score = score_fold(y_preds, y_trues, mask_thresh, size, dilation)
+        #
 
-        iter_score = np.mean(iter_scores)
         if iter_score > best_score:
             print(iter_score)
             best_score = iter_score
-            print(model, mask_thresh, size, dilation)
+            best_combo = (model, mask_thresh, size, dilation)
+            print(f'best combo', best_combo)
             print(string_sep)
             string_sep = string_sep[:-1] + "=>"
         else:
-            print("not better", iter_scores)
+            print("not better", best_combo)
 
         # gc.collect()
         # score_fold(y_preds, y_trues, ids)

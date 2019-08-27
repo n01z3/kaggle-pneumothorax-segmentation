@@ -13,7 +13,7 @@ from PIL import ImageFile
 from torch.autograd import Variable
 from tqdm import tqdm
 
-from n02_utils import warmup_lr_scheduler
+from n02_utils import warmup_lr_scheduler, select_best_checkpoint
 from n03_loss_metric import dice_coef_loss, bce_dice_loss
 from n03_loss_metric import dice_coef_metric_batch as dice_coef_metric
 from n03_zoo import UnetSENet154, UnetSEResNext101, UnetSEResNext50
@@ -43,11 +43,6 @@ else:
     print("ERROR: CUDA is not available. Exit")
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
-
-
-def select_best_checkpoint(folder, fold, model):
-    fns = sorted(glob(osp.join(folder, f"*{model}_fold{fold}*.pth")))
-    return fns[-1]
 
 
 def mkdir(path):

@@ -12,8 +12,11 @@ import torch
 from tqdm import tqdm
 
 from n01_config import get_paths
+from n02_utils import select_best_checkpoint
 from n03_loss_metric import dice_coef_metric
 from n04_dataset import SIIMDataset_Unet
+
+
 
 DEVICE = torch.device("cuda:0")
 from torch.autograd import Variable
@@ -37,7 +40,8 @@ def calc_score(data):
 def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_dir="outs", validate=True):
     assert mode in ("train", "valid", "test"), mode
 
-    model_ft = torch.load(osp.join(weights_dir, f"{model_name}_fold{fold}_best.pth"))
+    checkpoint = select_best_checkpoint(osp.join(weights_dir, model_name), fold, model_name)
+    model_ft = torch.load(checkpoint)
     model_ft.to(DEVICE)
     model_ft.eval()
 
@@ -123,29 +127,30 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
 def parse_args():
     parser = argparse.ArgumentParser(description="pneumo segmentation")
     parser.add_argument("--fold", help="fold id to predict", default=0, type=int)
+    parser.add_argument("--model", help="model name to predict", default='se154', type=str)
     args = parser.parse_args()
     return args
 
 
 def main():
     args = parse_args()
+    print(args)
     paths = get_paths()
     weights_dir = osp.join(paths["dumps"]["path"], paths["dumps"]["weights"])
     dumps_dir = osp.join(paths["dumps"]["path"], paths["dumps"]["predictions"])
 
     scores = []
-    for model in ["sx101", "sx50"]:
-        for mode in ["test", 'valid']:  # 'test'
-            if args.fold >= 0:
-                lst = [args.fold]
-            else:
-                lst = list(range(8))
 
-            for fold in lst:
-                score = predict_fold(model, fold=fold, mode=mode, out_folder=dumps_dir, weights_dir=weights_dir)
-                scores.append(score)
-        print(scores[:10])
-        print(scores[-10:])
+    for mode in ["test", 'valid']:  # 'test'
+        if args.fold >= 0:
+            lst = [args.fold]
+        else:
+            lst = list(range(8))
+
+        for fold in lst:
+            score = predict_fold(args.model, fold=fold, mode=mode, out_folder=dumps_dir, weights_dir=weights_dir)
+            scores.append(score)
+    print(scores[:10])
 
 
 def check_prdictions():

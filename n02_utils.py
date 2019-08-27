@@ -1,5 +1,9 @@
 __author__ = "n01z3"
 
+from glob import glob
+import os
+import os.path as osp
+import shutil
 import numpy as np
 
 # import pickle
@@ -57,3 +61,23 @@ def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
         return warmup_factor * (1 - alpha) + alpha
 
     return torch.optim.lr_scheduler.LambdaLR(optimizer, f)
+
+
+def select_best_checkpoint(folder, fold, model):
+    fns = sorted(glob(osp.join(folder, f"*{model}_fold{fold}*.pth")))
+    return fns[-1]
+
+
+def select_sota_weights(folder_input, folder_dist, model="se154"):
+    os.makedirs(folder_dist, exist_ok=True)
+
+    for fold in range(8):
+        top_weight = select_best_checkpoint(folder_input, fold, model)
+        print(top_weight)
+        shutil.copyfile(top_weight, osp.join(folder_dist, osp.basename(top_weight)))
+
+
+if __name__ == "__main__":
+    select_sota_weights(
+        "/mnt/hdd1/learning_dumps/pneumo/sota_weights", "/mnt/hdd1/learning_dumps/pneumo/sota_weights/se154"
+    )
