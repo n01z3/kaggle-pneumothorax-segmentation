@@ -22,7 +22,7 @@ from n04_dataset import SIIMDataset_Unet
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-IMG_SIZE = 1024
+IMG_SIZE = 224
 
 MODELS = {"sx50": UnetSEResNext50(), "sx101": UnetSEResNext101(), "se154": UnetSENet154(), 
             "sx101hyper": get_hypermodel('UNetResNextHyperSE101')}
@@ -37,9 +37,9 @@ os.environ["PYTHONHASHSEED"] = str(SEED)
 np.random.seed(SEED)
 
 if torch.cuda.is_available:
-    torch.manual_SEED(SEED)
-    torch.cuda.manual_SEED(SEED)
-    torch.cuda.manual_SEED_all(SEED)
+    torch.manual_seed(SEED)
+    torch.cuda.manual_seed(SEED)
+    torch.cuda.manual_seed_all(SEED)
 else:
     print("ERROR: CUDA is not available. Exit")
 torch.backends.cudnn.benchmark = False
