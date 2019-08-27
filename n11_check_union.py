@@ -98,32 +98,36 @@ def check_binary_union_fold(fold):
     return dice_coef_metric_batch(models_union_bin, gts)
 
 
-def main():
+def main(dilation_in, min_size_thresh_in):
     global model_name, n_fold, mask_thresh, min_size_thresh, dilation, dumps_dir
     # model_name = "sx50+sx101+se154"
     model_name = "sx50+sx101"
     n_fold = 8
 
     mask_thresh = 0.5
-    min_size_thresh = 1000
-    dilation = 0
+    min_size_thresh = min_size_thresh_in
+    dilation = dilation_in
     mean_scores, bin_union_scores = [], []
 
-    print(f"Validation DICEs over 2 models :")
-    print(f"                    MEAN        :      UNION  ")
+    # print(f"Validation DICEs over 2 models :")
+    # print(f"                    MEAN        :      UNION  ")
     for fold in range(n_fold):
         mean_score = check_mean_fold(fold)
         mean_scores.append(mean_score)
-        # mean_score = 0
         bin_union_score = check_binary_union_fold(fold)
         bin_union_scores.append(bin_union_score)
-        print(f"Fold {fold} :    {mean_score}   :  {bin_union_score}")
-
-    # for dice_score in mean_scores:
+        # print(f"Fold {fold} :    {mean_score}   :  {bin_union_score}")
         
-    print(f"Mean validation DICE over 2 models: ")
+    print(f"Mean validation DICE over 2 models: dilation: {dilation}  min_size_thresh: {min_size_thresh}")
     print(f" {np.mean(mean_scores)}   :  {np.mean(bin_union_scores)}")
 
 
 if __name__ == '__main__':
-    main()
+    dilations = [0,1,2]
+    thresh_mins = [1000, 1500, 2000]
+    for dil in dilations:
+        for thresh_min in thresh_mins:
+            main(dil, thresh_min)
+
+
+

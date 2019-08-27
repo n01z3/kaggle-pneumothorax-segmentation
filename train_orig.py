@@ -32,9 +32,9 @@ os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 
-random.SEED(SEED)
+random.seed(SEED)
 os.environ["PYTHONHASHSEED"] = str(SEED)
-np.random.SEED(SEED)
+np.random.seed(SEED)
 
 if torch.cuda.is_available:
     torch.manual_SEED(SEED)
