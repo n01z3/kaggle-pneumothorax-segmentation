@@ -181,7 +181,7 @@ if __name__ == "__main__":
     tloader = torch.utils.data.DataLoader(dataset_train, batch_size=2, shuffle=True, num_workers=12)
 
     dataset_valid = SIIMDataset_Unet(mode="valid", fold=args.fold, image_size=args.size)
-    vloader = torch.utils.data.DataLoader(dataset_valid, batch_size=4, shuffle=False, num_workers=12)
+    vloader = torch.utils.data.DataLoader(dataset_valid, batch_size=3, shuffle=False, num_workers=12)
 
     bestscore = 0.001
     device = torch.device("cuda:0")
