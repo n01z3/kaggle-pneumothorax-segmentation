@@ -21,10 +21,12 @@ def get_spaced_colors2(n):
 
 
 random.seed(42)
-COLORS = get_spaced_colors2(6)
+COLORS = get_spaced_colors2(8)
 
 
 def get_one_log(filename="sx50/0fold_1.log", separator="Validation DICE score: "):
+    if 'sxh' in filename:
+        filename = filename.replace('sxh101/', 'sxh101/sxh101').replace('fold_1', 'fold_2')
     with open(filename) as f:
         content = f.readlines()
     content = [x.strip() for x in content]
@@ -65,7 +67,7 @@ def main():
     dices = [get_one_log("logs/ref_8710.log", separator="Validation loss: ")]
     names = ["ref dice 8710LB sota log"]
     folds_scores = [[] for _ in range(10)]
-    net_names = ["sx50", "sx101", "se154"]
+    net_names = ["sx50", "sx101", "se154", "sxh101"]
 
     plt.figure(figsize=(15, 15))
     out_string = ""

@@ -22,13 +22,13 @@ def main():
 
     total_preds = np.zeros([len(sample_df), 1024, 1024])
 
-    subs = os.listdir("subm/corr1")
+    subs = os.listdir("subm/corr0")
 
     pred_dict = {}
 
     for jj in range(len(subs)):
         print(subs[jj])
-        df = pd.read_csv(f"subm/corr1/{subs[jj]}")
+        df = pd.read_csv(f"subm/corr0/{subs[jj]}")
 
         for index, row in tqdm.tqdm(df.iterrows(), total=len(df)):
             image_id = row["ImageId"]
@@ -49,7 +49,7 @@ def main():
 
     #################################################################
 
-    threshold_list = [0, 1]  # 0 - if union, 1 - if with certainty of 2 for many models
+    threshold_list = [0]  # 0 - if union, 1 - if with certainty of 2 for many models
 
     for threshold in threshold_list:
         sublist = []
@@ -74,7 +74,8 @@ def main():
                 sublist.append([image_id, rle])
 
             submission_df = pd.DataFrame(sublist, columns=sample_df.columns.values)
-            submission_df.to_csv(f"subm/union_submission_corr1_{model_name}_{threshold}.csv", index=False)
+            submission_df.to_csv(f"subm/union_submission_corr0_{model_name}_{threshold}.csv", index=False)
+
 
 
 if __name__ == "__main__":

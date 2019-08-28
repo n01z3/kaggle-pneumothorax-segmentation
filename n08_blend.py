@@ -66,7 +66,7 @@ def get_data(model_name="sx101", fold=0):
     return y_preds, y_trues, scores, ids
 
 
-def get_data_npz(model_name="sx101", fold=0, mode="valid"):
+def get_data_npz(model_name="sx101", fold=0,mode = "valid"):
     name_pattern = f"{fold}_{model_name}_{mode}"
 
     filename = osp.join(PREDICTS, model_name, name_pattern, f"{name_pattern}_index.npz")
@@ -157,6 +157,11 @@ def score_sample(data):
 
 def score_fold(y_preds, y_trues, mask_thresh=0.5, min_size_thresh=1500, dilation=2):
     total = len(y_trues)
+
+    # with Pool() as p:
+    #     scores = p.map(score_sample,
+    #                    zip(y_preds, y_trues, total * [mask_thresh], total * [min_size_thresh], total * [dilation]))
+
     with Pool(NCORE) as p:
         scores = list(
             tqdm(
@@ -192,11 +197,11 @@ def random_search():
     # gc.collect()
 
     for n in range(1000):
-        size = random.randint(500, 2500)
-        mask_thresh = random.uniform(0.45, 0.55)
+        size = random.choice(sizes)
+        mask_thresh = random.choice(mask_threshs)
         dilation = random.choice(dilations)
         if n == 0:
-            size, mask_thresh, dilation = 2, 0.5, 1000  # sx101
+            size, mask_thresh, dilation = 2, 0.5, 1000 # sx101
 
         iter_scores = []
         for y_preds, y_trues in folds:
@@ -211,7 +216,7 @@ def random_search():
             print(string_sep)
             string_sep = string_sep[:-1] + "=>"
         else:
-            print("not better", iter_scores)
+            print('not better', iter_scores)
 
 
 if __name__ == "__main__":

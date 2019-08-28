@@ -30,3 +30,91 @@ Epoch [36]
 Mean loss on train: 0.4061658903124001 Mean DICE on train: 0.7401344869972323
 START validation
 Epoch:  36  Threshold:  0.5  Validation DICE score: 0.8381921413172352
+Epoch [37]
+Mean loss on train: 0.4047552561963999 Mean DICE on train: 0.7452243109810762
+START validation
+Epoch:  37  Threshold:  0.5  Validation DICE score: 0.8373786069464442
+Epoch [38]
+Mean loss on train: 0.40027082970022115 Mean DICE on train: 0.7448318159025517
+START validation
+Epoch:  38  Threshold:  0.5  Validation DICE score: 0.8373936750398849
+Epoch [39]
+Mean loss on train: 0.400675257054494 Mean DICE on train: 0.7417067698015428
+START validation
+Epoch:  39  Threshold:  0.5  Validation DICE score: 0.8400957286010139
+Epoch [40]
+Mean loss on train: 0.4035916350910712 Mean DICE on train: 0.7408819645650064
+START validation
+Epoch:  40  Threshold:  0.5  Validation DICE score: 0.8395557264927068
+Epoch [41]
+Mean loss on train: 0.4043424772044996 Mean DICE on train: 0.7455222557475956
+START validation
+Epoch:  41  Threshold:  0.5  Validation DICE score: 0.8385693124992099
+Epoch [42]
+Mean loss on train: 0.40052115672033806 Mean DICE on train: 0.7468975008806623
+START validation
+Epoch:  42  Threshold:  0.5  Validation DICE score: 0.8375172780311131
+Epoch [43]
+Mean loss on train: 0.402548120679458 Mean DICE on train: 0.7402191150728776
+START validation
+Epoch:  43  Threshold:  0.5  Validation DICE score: 0.8383383106607571
+Epoch [44]
+Mean loss on train: 0.4031168005180434 Mean DICE on train: 0.7453089792611762
+START validation
+Epoch:  44  Threshold:  0.5  Validation DICE score: 0.837899222958694
+Epoch [45]
+Mean loss on train: 0.4007744629669087 Mean DICE on train: 0.7475769319852122
+START validation
+Epoch:  45  Threshold:  0.5  Validation DICE score: 0.8327929729539161
+Epoch [46]
+Mean loss on train: 0.40690946699982733 Mean DICE on train: 0.7405718033678753
+START validation
+Epoch:  46  Threshold:  0.5  Validation DICE score: 0.8377926127524052
+Epoch [47]
+Mean loss on train: 0.4023106575292041 Mean DICE on train: 0.7457794236669376
+START validation
+Epoch:  47  Threshold:  0.5  Validation DICE score: 0.8408019738925537
+SAVE BEST MODEL! Epoch:  47
+Epoch [48]
+Mean loss on train: 0.400420513066576 Mean DICE on train: 0.7470026293794045
+START validation
+Epoch:  48  Threshold:  0.5  Validation DICE score: 0.8411446361779814
+SAVE BEST MODEL! Epoch:  48
+Epoch [49]
+Mean loss on train: 0.4019836138605195 Mean DICE on train: 0.7411574678191694
+START validation
+Epoch:  49  Threshold:  0.5  Validation DICE score: 0.8386836716742165
+fold2 loaded outs/0.84118_se154_fold2_best.pth
+Epoch [50]
+Mean loss on train: 0.3811543888260512 Mean DICE on train: 0.7410223816547448
+START validation
+Epoch:  50  Threshold:  0.5  Validation DICE score: 0.837838062128796
+Epoch [51]
+Mean loss on train: 0.3844370042122076 Mean DICE on train: 0.7369361581054865
+START validation
+Epoch:  51  Threshold:  0.5  Validation DICE score: 0.8340327558049174
+Epoch [52]
+Mean loss on train: 0.3820340374433465 Mean DICE on train: 0.7371276785272325
+START validation
+Epoch:  52  Threshold:  0.5  Validation DICE score: 0.8368490902147881
+Epoch [53]
+Mean loss on train: 0.3800967062198663 Mean DICE on train: 0.7419631009671844
+START validation
+Epoch:  53  Threshold:  0.5  Validation DICE score: 0.8397406239900962
+Epoch [54]
+Mean loss on train: 0.37967412820521823 Mean DICE on train: 0.7336280322756369
+START validation
+Epoch:  54  Threshold:  0.5  Validation DICE score: 0.8378115568620164
+Epoch [55]
+Mean loss on train: 0.37167221012402035 Mean DICE on train: 0.7511418373822991
+START validation
+Epoch:  55  Threshold:  0.5  Validation DICE score: 0.8382995217761854
+Epoch [56]
+Mean loss on train: 0.37852703618852795 Mean DICE on train: 0.7462271012357559
+START validation
+Epoch:  56  Threshold:  0.5  Validation DICE score: 0.8400161436568744
+Epoch [57]
+Mean loss on train: 0.38023379024245296 Mean DICE on train: 0.746271412389912
+START validation
+Epoch:  57  Threshold:  0.5  Validation DICE score: 0.8411825205163049
+SAVE BEST MODEL! Epoch:  57
