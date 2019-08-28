@@ -30,13 +30,14 @@ PREDICTS = PATHS["dumps"]["predictions"]
 
 
 def read_prediction(filename):
+    # print(filename)
     return cv2.imread(filename, 0) / 255.0
 
 
 def get_data(model_name="sx101", fold=0):
     paths = get_paths()
     dumps_dir = osp.join(paths["dumps"]["path"], paths["dumps"]["predictions"])
-    dst = osp.join(dumps_dir, f"{fold}_{model_name}_valid")
+    dst = osp.join(dumps_dir, model_name, f"{fold}_{model_name}_valid")
 
     dataset_valid = SIIMDataset_Unet(mode="valid", fold=fold)
     vloader = torch.utils.data.DataLoader(dataset_valid, batch_size=1, shuffle=False, num_workers=NCORE)
@@ -65,8 +66,7 @@ def get_data(model_name="sx101", fold=0):
     return y_preds, y_trues, scores, ids
 
 
-def get_data_npz(model_name="sx101", fold=0):
-    mode = "valid"
+def get_data_npz(model_name="sx101", fold=0, mode="valid"):
     name_pattern = f"{fold}_{model_name}_{mode}"
 
     filename = osp.join(PREDICTS, model_name, name_pattern, f"{name_pattern}_index.npz")
@@ -75,6 +75,8 @@ def get_data_npz(model_name="sx101", fold=0):
     outputs, outputs_mirror, ids, gts = tfz["outputs"], tfz["outputs_mirror"], tfz["ids"], tfz["gts"]
     print(outputs.shape, outputs_mirror.shape, gts.shape)
     y_preds = np.mean(np.concatenate([outputs_mirror, outputs], axis=1), axis=1) / 255.0
+    del outputs, outputs_mirror, tfz
+
     print(y_preds.shape)
     score = dice_coef_metric_batch(y_preds > 0.5, gts > 0.5)
     print(model_name, fold, score)
@@ -155,11 +157,6 @@ def score_sample(data):
 
 def score_fold(y_preds, y_trues, mask_thresh=0.5, min_size_thresh=1500, dilation=2):
     total = len(y_trues)
-
-    # with Pool() as p:
-    #     scores = p.map(score_sample,
-    #                    zip(y_preds, y_trues, total * [mask_thresh], total * [min_size_thresh], total * [dilation]))
-
     with Pool(NCORE) as p:
         scores = list(
             tqdm(
@@ -175,55 +172,46 @@ def score_fold(y_preds, y_trues, mask_thresh=0.5, min_size_thresh=1500, dilation
 
 
 def random_search():
-    model = "sx101"
+    model = "se154"
     folds = []
-    n_folds = 2
+    n_folds = 4
     string_sep = "8===>"
 
-    # sizes = [500, 1000, 1500, 2000, 2500]
-    # mask_threshs = [0.4, 0.45, 0.5, 0.55, 0.60]
+    sizes = [500, 1000, 1500, 2000, 2500]
+    mask_threshs = [0.4, 0.45, 0.5, 0.55, 0.60]
     dilations = [0, 1, 2, 3]
 
-    y_preds, y_trues, base_scores = [], [], []
+    base_scores = []
     for i in range(n_folds):
-        ty_preds, ty_trues, scores, ids = get_data_npz(model, fold=i)
+        y_preds, y_trues, scores, ids = get_data(model, fold=i)
         base_scores.append(np.mean(scores))
-        # folds.append((y_preds, y_trues))
-        y_preds.append(ty_preds.astype(np.float32))
-        y_trues.append(ty_trues.astype(np.float32))
-
-    y_preds = np.concatenate(y_preds, axis=0).astype(np.float32)
-    y_trues = np.concatenate(y_trues, axis=0).astype(np.float32)
+        folds.append((y_preds, y_trues))
 
     best_score = np.mean(base_scores)
     print("base_score", best_score)
-    gc.collect()
+    # gc.collect()
 
-    best_combo = ()
     for n in range(1000):
         size = random.randint(500, 2500)
-        mask_thresh = random.uniform(0.42, 0.58)
+        mask_thresh = random.uniform(0.45, 0.55)
         dilation = random.choice(dilations)
         if n == 0:
-            size, mask_thresh, dilation = 1000, 0.5, 0  # sx101
+            size, mask_thresh, dilation = 2, 0.5, 1000  # sx101
 
         iter_scores = []
-        # for y_preds, y_trues in folds:
-        iter_score = score_fold(y_preds, y_trues, mask_thresh, size, dilation)
-        #
+        for y_preds, y_trues in folds:
+            tscore = score_fold(y_preds, y_trues, mask_thresh, size, dilation)
+            iter_scores.append(tscore)
 
+        iter_score = np.mean(iter_scores)
         if iter_score > best_score:
             print(iter_score)
             best_score = iter_score
-            best_combo = (model, mask_thresh, size, dilation)
-            print(f'best combo', best_combo)
+            print(model, mask_thresh, size, dilation)
             print(string_sep)
             string_sep = string_sep[:-1] + "=>"
         else:
-            print("not better", best_combo)
-
-        # gc.collect()
-        # score_fold(y_preds, y_trues, ids)
+            print("not better", iter_scores)
 
 
 if __name__ == "__main__":

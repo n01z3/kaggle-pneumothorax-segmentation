@@ -4,7 +4,6 @@ import os
 import os.path as osp
 import random
 import warnings
-from glob import glob
 
 import numpy as np
 import torch
@@ -22,10 +21,15 @@ from n04_dataset import SIIMDataset_Unet
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-IMG_SIZE = 224
 
-MODELS = {"sx50": UnetSEResNext50(), "sx101": UnetSEResNext101(), "se154": UnetSENet154(), 
-            "sx101hyper": get_hypermodel('UNetResNextHyperSE101')}
+MODELS = {
+    "sx50": UnetSEResNext50(),
+    "sx101": UnetSEResNext101(),
+    "se154": UnetSENet154(),
+    "sxh50": get_hypermodel("UNetResNextHyperSE50"),
+    "sxh101": get_hypermodel("UNetResNextHyperSE101"),
+
+}
 SEED = 486
 
 os.environ["MKL_NUM_THREADS"] = "1"
@@ -60,9 +64,6 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, lo
     cntr = 0
     losses = []
     accur = []
-
-    # if not os.path.exists(model_name+'_trout/'):
-    # 	os.mkdir(model_name+'_trout/')
 
     lr_scheduler = None
     if epoch == 0:
@@ -110,7 +111,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, lo
             loss.backward()
             optimizer.step()
 
-            if cntr % 10 == 0:
+            if print_freq % 10 == 0:
                 progress_bar.postfix[0] = f"loss: {np.mean(np.array(losses)):0.4f}"
                 progress_bar.postfix[1] = f"dice: {np.mean(np.array(accur)):0.4f}"
                 progress_bar.update()
@@ -123,7 +124,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, lo
     print("Mean loss on train:", np.array(losses).mean(), "Mean DICE on train:", np.array(accur).mean())
 
 
-def val_epoch(model, optimizer, data_loader_valid, device, epoch):
+def val_epoch(model, data_loader_valid, epoch):
     print("START validation")
     model.eval()
     cntr = 0
@@ -163,14 +164,11 @@ def val_epoch(model, optimizer, data_loader_valid, device, epoch):
     return valloss / cntr
 
 
-def mycol(x):
-    return tuple(zip(*x))
-
-
 def parse_args():
     parser = argparse.ArgumentParser(description="pneumo segmentation")
     parser.add_argument("--fold", help="fold id to train", default=0, type=int)
-    parser.add_argument("--net", help="net arch", default="se154", type=str)
+    parser.add_argument("--net", help="net arch", default="sxh101", type=str)
+    parser.add_argument("--size", help="image size", default=768, type=int)
     args = parser.parse_args()
     return args
 
@@ -179,14 +177,12 @@ if __name__ == "__main__":
     eps = 0.0005
     args = parse_args()
 
-    dataset_train = SIIMDataset_Unet(mode="train", fold=args.fold)
+    dataset_train = SIIMDataset_Unet(mode="train", fold=args.fold, image_size=args.size)
     tloader = torch.utils.data.DataLoader(dataset_train, batch_size=2, shuffle=True, num_workers=12)
 
-    dataset_valid = SIIMDataset_Unet(mode="valid", fold=args.fold)
-    vloader = torch.utils.data.DataLoader(dataset_valid, batch_size=4, shuffle=False, num_workers=8)
+    dataset_valid = SIIMDataset_Unet(mode="valid", fold=args.fold, image_size=args.size)
+    vloader = torch.utils.data.DataLoader(dataset_valid, batch_size=4, shuffle=False, num_workers=12)
 
-    switch_grads = 1
-    num_classes = 1
     bestscore = 0.001
     device = torch.device("cuda:0")
 
@@ -194,65 +190,38 @@ if __name__ == "__main__":
     dst = "outs"
     os.makedirs(dst, exist_ok=True)
 
-    ################################################################################################
-    ################################ FROM SCRATCH ON 1024 ##########################################
-    ################################################################################################
-
-    model_ft = MODELS.get(args.net)  # get_hypermodel('UNetResNextHyperSE50')
+    model_ft = MODELS.get(args.net)
     model_ft.to(device)
-
     for param in model_ft.parameters():
         param.requires_grad = True
 
     params = [p for p in model_ft.parameters() if p.requires_grad]
-    optimizer = torch.optim.Adam(params, lr=0.0001)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 4, 1e-6)
 
-    num_epochs = 30
-    for epoch in range(num_epochs):
+    stage_epoch = [40, 15, 16]
+    stage_optimizer = [
+        torch.optim.Adam(params, lr=0.0001),
+        torch.optim.SGD(params, lr=0.0001, momentum=0.9),
+        torch.optim.Adam(params, lr=0.0001),
+    ]
 
-        train_one_epoch(model_ft, optimizer, tloader, device, epoch, print_freq=100)
-        valscore = val_epoch(model_ft, optimizer, vloader, device, epoch)
+    stage_scheduler = [
+        torch.optim.lr_scheduler.CosineAnnealingLR(stage_optimizer[0], 4, 1e-6),
+        torch.optim.lr_scheduler.CyclicLR(stage_optimizer[1], base_lr=1e-5, max_lr=2e-4),
+        torch.optim.lr_scheduler.CosineAnnealingLR(stage_optimizer[2], 4, 1e-6),
+    ]
 
-        if valscore > bestscore - eps:
-            bestscore = valscore
-            print("SAVE BEST MODEL! Epoch: ", epoch)
-            torch.save(model_ft, osp.join(dst, f"{valscore:0.5f}_{model_name}"))
-        lr_scheduler.step()
+    for z, (num_epochs, optimizer, lr_scheduler) in enumerate(zip(stage_epoch, stage_optimizer, stage_scheduler)):
+        for epoch in range(num_epochs):
 
-    checkpoint = select_best_checkpoint(dst, args.fold, args.net)
-    print(f"fold{args.fold} loaded {checkpoint}")
-    model_ft = torch.load(checkpoint)
-    optimizer = torch.optim.SGD(params, lr=0.0001, momentum=0.9)
-    lr_scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=1e-5, max_lr=2e-4)
+            train_one_epoch(model_ft, optimizer, tloader, device, epoch, print_freq=10)
+            valscore = val_epoch(model_ft, vloader, epoch)
 
-    num_epochs = 20
-    for epoch in range(num_epochs):
+            if valscore > bestscore - eps:
+                print(f"IMPROVEMENT with delta:{(valscore - bestscore):0.6f}|on epoch{epoch}|stage{z}")
+                bestscore = valscore
+                torch.save(model_ft, osp.join(dst, f"{valscore:0.5f}_{model_name}"))
+            lr_scheduler.step()
 
-        train_one_epoch(model_ft, optimizer, tloader, device, epoch + 30, print_freq=100)
-        valscore = val_epoch(model_ft, optimizer, vloader, device, epoch + 30)
-
-        if valscore > bestscore - eps:
-            bestscore = valscore
-            print("SAVE BEST MODEL! Epoch: ", epoch + 30)
-            torch.save(model_ft, osp.join(dst, f"{valscore:0.5f}_{model_name}"))
-        lr_scheduler.step()
-
-    checkpoint = select_best_checkpoint(dst, args.fold, args.net)
-    print(f"fold{args.fold} loaded {checkpoint}")
-    model_ft = torch.load(checkpoint)
-
-    optimizer = torch.optim.Adam(params, lr=0.0001)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 4, 1e-6)
-
-    num_epochs = 20
-    for epoch in range(num_epochs):
-
-        train_one_epoch(model_ft, optimizer, tloader, device, epoch + 50, print_freq=100, losstype="dice_only")
-        valscore = val_epoch(model_ft, optimizer, vloader, device, epoch + 50)
-
-        if valscore > bestscore - eps:
-            bestscore = valscore
-            print("SAVE BEST MODEL! Epoch: ", epoch + 50)
-            torch.save(model_ft, osp.join(dst, f"{valscore:0.5f}_{model_name}"))
-        lr_scheduler.step()
+        checkpoint = select_best_checkpoint(dst, args.fold, args.net)
+        print(f"fold{args.fold} loaded {checkpoint}")
+        model_ft = torch.load(checkpoint)

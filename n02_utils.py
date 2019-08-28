@@ -65,7 +65,10 @@ def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
 
 def select_best_checkpoint(folder, fold, model):
     fns = sorted(glob(osp.join(folder, f"*{model}_fold{fold}*.pth")))
-    return fns[-1]
+    if len(fns) == 0:
+        return None
+    else:
+        return fns[-1]
 
 
 def select_sota_weights(folder_input, folder_dist, model="se154"):

@@ -16,8 +16,6 @@ from n02_utils import select_best_checkpoint
 from n03_loss_metric import dice_coef_metric
 from n04_dataset import SIIMDataset_Unet
 
-
-
 DEVICE = torch.device("cuda:0")
 from torch.autograd import Variable
 
@@ -63,7 +61,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
         batch1ch = torch.cat([images, mirror], dim=0)
         batch3ch = torch.FloatTensor(np.empty((batch1ch.shape[0], 3, batch1ch.shape[2], batch1ch.shape[3])))
         for chan_idx in range(3):
-            batch3ch[:, chan_idx : chan_idx + 1, :, :] = batch1ch
+            batch3ch[:, chan_idx: chan_idx + 1, :, :] = batch1ch
         images = Variable(batch3ch.cuda())
         targets = targets.data.cpu().numpy()
 
@@ -74,11 +72,15 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
             # probabilityTTA = np.mean(
             #     np.concatenate([probability[0 + j], probability[targets.shape[0] + j][:, :, ::-1]], axis=0), axis=0
             # )
-            # outputs.append(np.uint8(255 * probabilityTTA))
+            # probabilityTTA[probabilityTTA < 0.05] = 0
             # outputs.append(probabilityTTA)
 
-            predict1 = np.uint8(255 * probability[0 + j])
-            predict1_mirror = np.uint8(255 * probability[targets.shape[0] + j][:, :, ::-1])
+            # outputs.append(probabilityTTA)
+
+            predict1 = probability[0 + j]
+            predict1[predict1 < 0.02] = 0
+            predict1_mirror = probability[targets.shape[0] + j][:, :, ::-1]
+            predict1_mirror[predict1_mirror < 0.02] = 0
 
             outputs.append(predict1)
             outputs_mirror.append(predict1_mirror)
@@ -98,7 +100,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
             gc.collect()
 
     np.savez_compressed(
-        osp.join(dst, f"{name_pattern}_index.npz"),
+        osp.join(dst, f"{name_pattern}_fp32_mirror.npz"),
         outputs=np.array(outputs),
         outputs_mirror=np.array(outputs_mirror),
         ids=np.array(all_ids),
@@ -127,7 +129,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
 def parse_args():
     parser = argparse.ArgumentParser(description="pneumo segmentation")
     parser.add_argument("--fold", help="fold id to predict", default=0, type=int)
-    parser.add_argument("--model", help="model name to predict", default='se154', type=str)
+    parser.add_argument("--models", help="models name to predict", default='se154', type=str)
     args = parser.parse_args()
     return args
 
@@ -139,18 +141,24 @@ def main():
     weights_dir = osp.join(paths["dumps"]["path"], paths["dumps"]["weights"])
     dumps_dir = osp.join(paths["dumps"]["path"], paths["dumps"]["predictions"])
 
+    models = args.models
+    if "+" in models:
+        models = models.split('+')
+    else:
+        models = [models]
+
     scores = []
+    for model in models:
+        for mode in ["test", 'valid']:  # 'test'
+            if args.fold >= 0:
+                lst = [args.fold]
+            else:
+                lst = list(range(8))
 
-    for mode in ["test", 'valid']:  # 'test'
-        if args.fold >= 0:
-            lst = [args.fold]
-        else:
-            lst = list(range(8))
-
-        for fold in lst:
-            score = predict_fold(args.model, fold=fold, mode=mode, out_folder=dumps_dir, weights_dir=weights_dir)
-            scores.append(score)
-    print(scores[:10])
+            for fold in lst:
+                score = predict_fold(model, fold=fold, mode=mode, out_folder=dumps_dir, weights_dir=weights_dir)
+                scores.append(score)
+        print(scores[:10])
 
 
 def check_prdictions():
