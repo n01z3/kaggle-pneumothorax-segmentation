@@ -3,7 +3,7 @@ dumps:
   weights: 'sota_weights'
   hard: 'hard_samples'
   logs: 'logs'
-  predictions: '/mnt/ssd2/dataset/pneumo/predictions/fp16_predictions'
+  predictions: '/mnt/ssd2/dataset/pneumo/predictions/fp32_d_predictions'
   samples: 'samples'
 
 dataset:

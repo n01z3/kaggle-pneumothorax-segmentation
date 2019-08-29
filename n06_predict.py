@@ -53,7 +53,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
 
     progress_bar = tqdm(enumerate(vloader), total=len(vloader), desc=f"Predicting {mode} {fold}")
 
-    outputs, outputs_mirror, gts, filenames, all_ids = [], [], [], [], []
+    outputs, disagreements, gts, filenames, all_ids = [], [], [], [], []
     for i, batch in progress_bar:
         images, targets, ids = batch
 
@@ -69,53 +69,37 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
         probability = preictions.data.cpu().numpy()
 
         for j in range(targets.shape[0]):
-            # probabilityTTA = np.mean(
-            #     np.concatenate([probability[0 + j], probability[targets.shape[0] + j][:, :, ::-1]], axis=0), axis=0
-            # )
-            # probabilityTTA[probabilityTTA < 0.05] = 0
-            # outputs.append(probabilityTTA)
-
-            # outputs.append(probabilityTTA)
-
             predict1 = probability[0 + j]
             predict1[predict1 < 0.02] = 0
             predict1_mirror = probability[targets.shape[0] + j][:, :, ::-1]
             predict1_mirror[predict1_mirror < 0.02] = 0
 
-            outputs.append(predict1)
-            outputs_mirror.append(predict1_mirror)
+            predict = np.mean(np.concatenate([predict1, predict1_mirror], axis=0), axis=0)
+
+            disagree = dice_coef_metric(predict1 > 0.5, predict1_mirror > 0.5)
+            # area = np.sum(predict > 0.5)
+            # if area > 0:
+            #     disagree = np.sum(np.abs(predict1 - predict1_mirror)) / area
+            # else:
+            #     disagree = 0
+
+            outputs.append(predict)
+            disagreements.append(disagree)
 
             filenames.append(osp.join(dst, f"{ids[j]}.png"))
             all_ids.append(ids[j])
             gts.append(np.array(targets[j, 0] > 0.5).astype(np.bool))
 
         if i % 50 == 0 and i != 0:
-            #     np.savez(osp.join(dst, f'{name_pattern}_index{i}.npz'), outputs=np.array(outputs),
-            #              outputs_mirror=np.array(outputs_mirror),
-            #              ids=np.array(all_ids), gts=np.array(gts))
-            #     outputs = []
-            #     outputs_mirror = []
-            #     all_ids = []
-            #     gts = []
             gc.collect()
 
     np.savez_compressed(
-        osp.join(dst, f"{name_pattern}_fp32_mirror.npz"),
+        osp.join(dst, f"{name_pattern}_fp32_d.npz"),
         outputs=np.array(outputs),
-        outputs_mirror=np.array(outputs_mirror),
+        disagreements=np.array(disagreements),
         ids=np.array(all_ids),
         gts=np.array(gts),
     )
-
-    # with Pool() as p:
-    #     list(
-    #         tqdm(
-    #             p.imap_unordered(save_img, zip(filenames, outputs)),
-    #             total=len(filenames),
-    #             desc="saving predictions to image",
-    #         )
-    #     )
-    # p.close()
 
     with Pool() as p:
         scores = list(tqdm(p.imap_unordered(calc_score, zip(gts, outputs)), total=len(filenames), desc="calc score"))
@@ -129,7 +113,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
 def parse_args():
     parser = argparse.ArgumentParser(description="pneumo segmentation")
     parser.add_argument("--fold", help="fold id to predict", default=0, type=int)
-    parser.add_argument("--models", help="models name to predict", default='se154', type=str)
+    parser.add_argument("--models", help="models name to predict", default='sx101+sx50+se154+sxh101+sxh50', type=str)
     args = parser.parse_args()
     return args
 

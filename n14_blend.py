@@ -24,36 +24,34 @@ PATHS = get_paths()
 PREDICTS = PATHS["dumps"]["predictions"]
 
 
-def get_data_npz(model_name="sx101", fold=0):
-    mode = "valid"
-
+def get_data_npz(model_name="sx101", fold=0, mode="valid"):
     if "+" not in model_name:
         models = [model_name]
     else:
-        models = model_name.split('+')
+        models = model_name.split("+")
 
     name_pattern = f"{fold}_{models[0]}_{mode}"
-    filename = osp.join(PREDICTS, models[0], name_pattern, f"{name_pattern}_fp32.npz")
+    filename = osp.join(PREDICTS, models[0], name_pattern, f"{name_pattern}_fp32_d.npz")
     tfz = np.load(filename)
-    y_preds, ids, gts = tfz["outputs"], tfz["ids"], tfz["gts"]
+    y_preds, ids, gts, disagreements = tfz["outputs"], tfz["ids"], tfz["gts"], tfz['disagreements']
     score = dice_coef_metric_batch(y_preds > 0.5, gts > 0.5)
-    print(f'{models[0]} {score:0.5f}')
+    print(f"{models[0]} {score:0.5f}")
 
     if len(models) > 1:
         for n, model in enumerate(models[1:]):
             name_pattern = f"{fold}_{model}_{mode}"
-            filename = osp.join(PREDICTS, model, name_pattern, f"{name_pattern}_fp32.npz")
+            filename = osp.join(PREDICTS, model, name_pattern, f"{name_pattern}_fp32_d.npz")
             tfz = np.load(filename)
             y_preds += tfz["outputs"]
             score = dice_coef_metric_batch(y_preds > (n + 1) * 0.5, gts > 0.5)
-            print(f'add {model} {score:0.5f}')
+            print(f"add {model} {score:0.5f}")
 
         y_preds /= len(models)
 
     print(y_preds.shape, gts.shape)
     del tfz
     gc.collect()
-    return y_preds, gts, score, ids
+    return y_preds, gts, score, ids, disagreements
 
 
 def score_sample(data):
@@ -95,7 +93,7 @@ def score_fold(y_preds, y_trues, mask_thresh=0.5, min_size_thresh=1500, dilation
 
 
 def random_search():
-    model = "sx50+sx101+se154"
+    model = "sx50"
     print(model)
     n_folds = 4
     string_sep = "8===>"
@@ -104,7 +102,7 @@ def random_search():
 
     y_preds, y_trues, base_scores = [], [], []
     for i in range(n_folds):
-        ty_preds, ty_trues, scores, ids = get_data_npz(model, fold=i)
+        ty_preds, ty_trues, scores, ids, disagreements = get_data_npz(model, fold=i)
         base_scores.append(np.mean(scores))
         y_preds.append(ty_preds)
         y_trues.append(ty_trues)
@@ -131,7 +129,7 @@ def random_search():
             print(iter_score)
             best_score = iter_score
             best_combo = (model, mask_thresh, size, dilation)
-            print(f'best combo', best_combo)
+            print(f"best combo", best_combo)
             print(string_sep)
             string_sep = string_sep[:-1] + "=>"
         else:
