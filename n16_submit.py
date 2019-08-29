@@ -43,12 +43,12 @@ def binarize_sample(data):
 
 
 def convert_one(sample_id):
-    path_pattern = osp.join(predict_dir, 'tmp', f'{model_name}*{sample_id}*')
+    path_pattern = osp.join(predict_dir, "tmp", f"{model_name}*{sample_id}*")
     fns = glob(path_pattern)
     assert len(fns) == 1, path_pattern
 
     y_pred = np.load(fns[0])
-    agreement = float(osp.basename(fns[0]).split('|')[1])
+    agreement = float(osp.basename(fns[0]).split("|")[1])
     if agreement < 0.65 and correction:
         y_bin = binarize_sample((y_pred, mask_thresh, 1500, 2))
     else:
@@ -85,7 +85,7 @@ def dump_predicts():
     try:
         shutil.rmtree(dst)
     except:
-        print(f'no {dst}')
+        print(f"no {dst}")
     os.makedirs(dst, exist_ok=True)
     y_preds, y_trues, scores, ids, disagreements = get_data_npz(model_name, fold=0, mode="test")
 
@@ -110,14 +110,16 @@ def dump_predicts():
 
 
 def make_submite():
-    df = pd.read_csv("tables/test_ext.csv")
+    df = pd.read_csv("tables/stage_2_sample_submission.csv")
 
     with Pool() as p:
         rles = p.map(convert_one, df["ImageId"])
 
     df["EncodedPixels"] = rles
     os.makedirs("subm", exist_ok=True)
-    df.to_csv(f"subm/ext_{model_name}_{mask_thresh}_{min_size_thresh}_{dilation}_corr{int(correction)}.csv", index=False)
+    df.to_csv(
+        f"subm/st2_{model_name}_{mask_thresh}_{min_size_thresh}_{dilation}_corr{int(correction)}.csv", index=False
+    )
 
     empty = df[df["EncodedPixels"] == " -1"]
     print(f"empty {empty.shape[0] / df.shape[0]}")
@@ -138,7 +140,7 @@ if __name__ == "__main__":
         args.mask_thresh,
         args.min_size_thresh,
         args.dilation,
-        args.correction
+        args.correction,
     )
 
     dump_predicts()

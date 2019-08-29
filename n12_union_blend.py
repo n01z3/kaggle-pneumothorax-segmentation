@@ -14,12 +14,12 @@ def main():
     os.makedirs("outs/", exist_ok=True)
     model_name = "sx50_sx101_se154"
 
-    sample_df = pd.read_csv("tables/test_ext.csv")
+    sample_df = pd.read_csv("tables/stage_2_sample_submission.csv")
     sample_df = sample_df.drop_duplicates("ImageId", keep="last").reset_index(drop=True)
 
     pred_dict = {}
 
-    for subm_path in sorted(glob('subm/*csv')):
+    for subm_path in sorted(glob("subm/st2*csv")):
         print(subm_path)
         df = pd.read_csv(subm_path)
 
@@ -67,7 +67,7 @@ def main():
                 sublist.append([image_id, rle])
 
             submission_df = pd.DataFrame(sublist, columns=sample_df.columns.values)
-            submission_df.to_csv(f"subm/union_submission_corr1_{model_name}_{threshold}.csv", index=False)
+            submission_df.to_csv(f"subm/st2_union_submission_corr1_{model_name}_{threshold}.csv", index=False)
 
 
 if __name__ == "__main__":

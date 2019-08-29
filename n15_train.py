@@ -23,12 +23,11 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 MODELS = {
-    "sx50_st2": UnetSEResNext50(),
-    "sx101_st2": UnetSEResNext101(),
-    "se154_st2": UnetSENet154(),
-    "sxh50_st2": get_hypermodel("UNetResNextHyperSE50"),
-    "sxh101_st2": get_hypermodel("UNetResNextHyperSE101"),
-
+    "sx50": UnetSEResNext50(),
+    "sx101": UnetSEResNext101(),
+    "se154": UnetSENet154(),
+    "sxh50": get_hypermodel("UNetResNextHyperSE50"),
+    "sxh101": get_hypermodel("UNetResNextHyperSE101"),
 }
 SEED = 486
 
@@ -48,14 +47,6 @@ else:
     print("ERROR: CUDA is not available. Exit")
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
-
-
-def mkdir(path):
-    try:
-        os.makedirs(path)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
 
 
 def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq, losstype="bcedice"):
@@ -167,8 +158,8 @@ def val_epoch(model, data_loader_valid, epoch):
 def parse_args():
     parser = argparse.ArgumentParser(description="pneumo segmentation")
     parser.add_argument("--fold", help="fold id to train", default=0, type=int)
-    parser.add_argument("--net", help="net arch", default="sxh101", type=str)
-    parser.add_argument("--size", help="image size", default=768, type=int)
+    parser.add_argument("--net", help="net arch", default="sx101", type=str)
+    parser.add_argument("--size", help="image size", default=1024, type=int)
     args = parser.parse_args()
     return args
 
