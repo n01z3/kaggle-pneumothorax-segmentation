@@ -23,11 +23,11 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 MODELS = {
-    "sx50": UnetSEResNext50(),
-    "sx101": UnetSEResNext101(),
-    "se154": UnetSENet154(),
-    "sxh50": get_hypermodel("UNetResNextHyperSE50"),
-    "sxh101": get_hypermodel("UNetResNextHyperSE101"),
+    "sx50_st2": UnetSEResNext50(),
+    "sx101_st2": UnetSEResNext101(),
+    "se154_st2": UnetSENet154(),
+    "sxh50_st2": get_hypermodel("UNetResNextHyperSE50"),
+    "sxh101_st2": get_hypermodel("UNetResNextHyperSE101"),
 
 }
 SEED = 486

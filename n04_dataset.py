@@ -64,7 +64,7 @@ def strong_aug(p=0.5):
 class SIIMDataset_Unet(torch.utils.data.Dataset):
     def __init__(self, fold=0, mode="train", image_size=1024, normalized=False):
         assert mode in ("train", "valid", "test"), mode
-        self.df = pd.read_csv("tables/folds_v5.csv")
+        self.df = pd.read_csv("tables/fold_v6_st2.csv")
         if mode == "train":
             self.df = self.df[self.df["fold_id"] != fold]
         elif mode == "valid":
