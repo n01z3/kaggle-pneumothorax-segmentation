@@ -64,15 +64,16 @@ def strong_aug(p=0.5):
 class SIIMDataset_Unet(torch.utils.data.Dataset):
     def __init__(self, fold=0, mode="train", image_size=1024, normalized=False):
         assert mode in ("train", "valid", "test"), mode
-        self.df = pd.read_csv("tables/fold_v6_st2.csv")
+        self.df = pd.read_csv("tables/folds_v6_st2.csv")
         if mode == "train":
             self.df = self.df[self.df["fold_id"] != fold]
         elif mode == "valid":
             self.df = self.df[self.df["fold_id"] == fold]
         else:
-            self.df = pd.read_csv("tables/test.csv")
+            self.df = pd.read_csv("tables/stage_2_sample_submission.csv")
             self.df[" EncodedPixels"] = ["-1"] * self.df.shape[0]
 
+        print(self.df.head())
         print(f"{mode} {self.df.shape[0]}")
 
         self.gb = self.df.groupby("ImageId")
@@ -145,10 +146,10 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
 def check_dataset():
     batch_size = 9
     side = int(1.2 * batch_size ** 0.5)
-    mode = "valid"
+    mode = "test"
 
     for i in range(10):
-        dataset = SIIMDataset_Unet(mode=mode, fold=i, image_size=512, normalized=True)
+        dataset = SIIMDataset_Unet(mode=mode, fold=-1, image_size=512, normalized=True)
         vloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=16)
         progress_bar = tqdm(
             enumerate(vloader),
@@ -174,8 +175,8 @@ def check_dataset():
                 plt.subplot(side, side, i + 1)
                 plt.imshow(images[i, 0], cmap="gray")
 
-                # plt.title(f"area:{np.sum(masks[i])}")
-                # plt.imshow(masks[i, 0], alpha=0.5, cmap="Reds")
+                plt.title(f"area:{np.sum(masks[i])}")
+                plt.imshow(masks[i, 0], alpha=0.5, cmap="Reds")
             plt.show()
 
         print(time() - t0)

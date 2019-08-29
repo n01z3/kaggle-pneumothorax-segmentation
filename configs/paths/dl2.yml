@@ -3,11 +3,11 @@ dumps:
   weights: 'weights'
   hard: 'hard_samples'
   logs: 'logs'
-  predictions: '/mnt/hdd1/learning_dumps/pneumo/fp32_d_predictions'
+  predictions: '/mnt/hdd1/learning_dumps/pneumo/test2_fp32_d_predictions'
   samples: 'samples'
 
 dataset:
   path: '/mnt/ssd1/dataset/pneumo'
   images_dir: 'train_png'
   masks_dir: 'mask'
-  test_dir: 'test_png'
+  test_dir: 'ext'

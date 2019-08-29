@@ -44,9 +44,12 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
     model_ft.eval()
 
     name_pattern = f"{fold}_{model_name}_{mode}"
-
     dst = osp.join(out_folder, model_name, name_pattern)
     os.makedirs(dst, exist_ok=True)
+
+    npz_file = osp.join(dst, f"{name_pattern}_fp32_d.npz")
+    if osp.exists(npz_file):
+        return -1
 
     dataset_valid = SIIMDataset_Unet(mode=mode, fold=fold)
     vloader = torch.utils.data.DataLoader(dataset_valid, batch_size=2, shuffle=False, num_workers=4)
@@ -94,7 +97,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
             gc.collect()
 
     np.savez_compressed(
-        osp.join(dst, f"{name_pattern}_fp32_d.npz"),
+        npz_file,
         outputs=np.array(outputs),
         disagreements=np.array(disagreements),
         ids=np.array(all_ids),
@@ -105,6 +108,8 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
         scores = list(tqdm(p.imap_unordered(calc_score, zip(gts, outputs)), total=len(filenames), desc="calc score"))
     p.close()
 
+    del outputs, gts
+    gc.collect()
     score = np.mean(scores)
     print(f"\n{model_name} fold{fold} {score:0.4f}\n")
     return score
@@ -113,7 +118,7 @@ def predict_fold(model_name, fold=0, mode="valid", out_folder="outs", weights_di
 def parse_args():
     parser = argparse.ArgumentParser(description="pneumo segmentation")
     parser.add_argument("--fold", help="fold id to predict", default=0, type=int)
-    parser.add_argument("--models", help="models name to predict", default='sx101+sx50+se154+sxh101+sxh50', type=str)
+    parser.add_argument("--models", help="models name to predict", default='sx101+sx50+se154', type=str)
     args = parser.parse_args()
     return args
 
@@ -133,7 +138,7 @@ def main():
 
     scores = []
     for model in models:
-        for mode in ["test", 'valid']:  # 'test'
+        for mode in ["test"]:  # 'test'
             if args.fold >= 0:
                 lst = [args.fold]
             else:

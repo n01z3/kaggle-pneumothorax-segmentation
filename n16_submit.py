@@ -43,8 +43,9 @@ def binarize_sample(data):
 
 
 def convert_one(sample_id):
-    fns = glob(osp.join(predict_dir, 'tmp', f'{model_name}*{sample_id}*'))
-    assert len(fns) == 1, fns
+    path_pattern = osp.join(predict_dir, 'tmp', f'{model_name}*{sample_id}*')
+    fns = glob(path_pattern)
+    assert len(fns) == 1, path_pattern
 
     y_pred = np.load(fns[0])
     agreement = float(osp.basename(fns[0]).split('|')[1])
@@ -75,13 +76,16 @@ def parse_args():
     parser.add_argument("--min_size_thresh", help="filter small objets", default=1000, type=int)
     parser.add_argument("--dilation", help="dilation size", default=1, type=int)
     parser.add_argument("--model_name", help="models name to predict", default="se154", type=str)
-    parser.add_argument("--correction", help="apply correction", default=False, type=bool)
+    parser.add_argument("--correction", help="apply correction", default=True, type=bool)
     args = parser.parse_args()
     return args
 
 
 def dump_predicts():
-    shutil.rmtree(dst)
+    try:
+        shutil.rmtree(dst)
+    except:
+        print(f'no {dst}')
     os.makedirs(dst, exist_ok=True)
     y_preds, y_trues, scores, ids, disagreements = get_data_npz(model_name, fold=0, mode="test")
 
@@ -106,14 +110,14 @@ def dump_predicts():
 
 
 def make_submite():
-    df = pd.read_csv("tables/sample_submission.csv")
+    df = pd.read_csv("tables/test_ext.csv")
 
     with Pool() as p:
         rles = p.map(convert_one, df["ImageId"])
 
     df["EncodedPixels"] = rles
     os.makedirs("subm", exist_ok=True)
-    df.to_csv(f"subm/{model_name}_{mask_thresh}_{min_size_thresh}_{dilation}_corr{int(correction)}.csv", index=False)
+    df.to_csv(f"subm/ext_{model_name}_{mask_thresh}_{min_size_thresh}_{dilation}_corr{int(correction)}.csv", index=False)
 
     empty = df[df["EncodedPixels"] == " -1"]
     print(f"empty {empty.shape[0] / df.shape[0]}")

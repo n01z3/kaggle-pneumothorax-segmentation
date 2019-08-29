@@ -1,7 +1,7 @@
 __author__ = "bobbqe"
 
 import os
-
+from glob import glob
 import numpy as np
 import pandas as pd
 import tqdm
@@ -14,21 +14,14 @@ def main():
     os.makedirs("outs/", exist_ok=True)
     model_name = "sx50_sx101_se154"
 
-    sample_df = pd.read_csv("tables/sample_submission.csv")
+    sample_df = pd.read_csv("tables/test_ext.csv")
     sample_df = sample_df.drop_duplicates("ImageId", keep="last").reset_index(drop=True)
-
-    masks_ = sample_df.groupby("ImageId")["ImageId"].count().reset_index(name="N")
-    ###
-
-    total_preds = np.zeros([len(sample_df), 1024, 1024])
-
-    subs = os.listdir("subm/corr1")
 
     pred_dict = {}
 
-    for jj in range(len(subs)):
-        print(subs[jj])
-        df = pd.read_csv(f"subm/corr1/{subs[jj]}")
+    for subm_path in sorted(glob('subm/*csv')):
+        print(subm_path)
+        df = pd.read_csv(subm_path)
 
         for index, row in tqdm.tqdm(df.iterrows(), total=len(df)):
             image_id = row["ImageId"]
@@ -49,7 +42,7 @@ def main():
 
     #################################################################
 
-    threshold_list = [0, 1]  # 0 - if union, 1 - if with certainty of 2 for many models
+    threshold_list = [0]  # 0 - if union, 1 - if with certainty of 2 for many models
 
     for threshold in threshold_list:
         sublist = []
