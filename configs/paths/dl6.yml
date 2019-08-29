@@ -10,4 +10,4 @@ dataset:
   path: '/mnt/ssd1/dataset/pneumothorax_data/dataset1024'
   images_dir: 'train'
   masks_dir: 'mask'
-  test_dir: 'test'
+  test_dir: 'test2_png'
