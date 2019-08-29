@@ -8,6 +8,6 @@ dumps:
 
 dataset:
   path: '/mnt/ssd1/datasets/pneumothorax_data/dataset1024'
-  images_dir: 'train'
+  images_dir: 'train2'
   masks_dir: 'mask'
-  test_dir: 'test'
+  test_dir: 'test2_png'

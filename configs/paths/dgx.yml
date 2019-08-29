@@ -8,6 +8,6 @@ dumps:
 
 dataset:
   path: '/raid/data_share/dataset/pneumo'
-  images_dir: 'train_png'
+  images_dir: 'train2'
   masks_dir: 'mask'
-  test_dir: 'test_png'
+  test_dir: 'test2_png'

@@ -7,4 +7,4 @@ predict_fold() {
   CUDA_VISIBLE_DEVICES=${2} python n06_predict.py --fold=${1}
 }
 export -f predict_fold
-parallel -j4 --line-buffer predict_fold {} '$(({%} % 4))' ::: {4..7}
+parallel -j4 --line-buffer predict_fold {} '$(({%} % 4))' ::: {0..7}

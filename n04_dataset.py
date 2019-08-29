@@ -146,10 +146,10 @@ class SIIMDataset_Unet(torch.utils.data.Dataset):
 def check_dataset():
     batch_size = 9
     side = int(1.2 * batch_size ** 0.5)
-    mode = "test"
+    mode = "train"
 
     for i in range(10):
-        dataset = SIIMDataset_Unet(mode=mode, fold=-1, image_size=512, normalized=True)
+        dataset = SIIMDataset_Unet(mode=mode, fold=1, image_size=1024, normalized=True)
         vloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=16)
         progress_bar = tqdm(
             enumerate(vloader),

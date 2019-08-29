@@ -8,6 +8,6 @@ dumps:
 
 dataset:
   path: '/mnt/ssd2/dataset/pneumo'
-  images_dir: 'train_png'
+  images_dir: 'train2'
   masks_dir: 'mask'
   test_dir: 'test2_png'
