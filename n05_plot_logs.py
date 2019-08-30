@@ -2,6 +2,7 @@ __author__ = "n01z3"
 
 import random
 from glob import glob
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.legend_handler import HandlerLine2D
@@ -21,7 +22,7 @@ def get_spaced_colors2(n):
 
 
 random.seed(42)
-COLORS = get_spaced_colors2(8)
+COLORS = get_spaced_colors2(4)
 
 
 def get_one_log(filename="sx50/0fold_1.log", separator="Validation DICE score: "):
@@ -50,11 +51,16 @@ def plot_with_features(values, name, color=COLORS[0], title=None):
     plt.title(name)
     if title:
         plt.title(title)
-    plt.ylim(0.70, 0.86)
-    plt.xlim(0, 70)
+    plt.ylim(0.72, 0.88)
+    plt.xlim(0, 60)
     plt.grid(True)
-    # plt.ylabel('val dice')
-    # plt.xlabel('epoch')
+
+    if int(title[0]) % 3 == 0:
+        # plt.yticks([])
+        plt.ylabel("val dice")
+
+    if int(title[0]) > 5:
+        plt.xlabel("epoch")
 
     mvalue = np.amax(values)
     epoch = values.index(mvalue)
@@ -62,7 +68,7 @@ def plot_with_features(values, name, color=COLORS[0], title=None):
     plt.plot(epoch, mvalue, "or", markersize=9, color=color)
 
     line1, = plt.plot(values, color=color, label=name)
-    plt.grid(True)
+    plt.grid(True, axis="both")
     return line1
 
 
@@ -88,7 +94,7 @@ def stage1():
         plt.subplot(3, 3, 2 + fold)
         fold_lst = folds_scores[fold]
         for z, (values, net_name) in enumerate(zip(fold_lst, net_names)):
-            line1 = plot_with_features(values, net_name, COLORS[2 * z], f"{fold} fold")
+            line1 = plot_with_features(values, net_name, COLORS[z], f"{fold} fold")
         plt.legend(handler_map={line1: HandlerLine2D(numpoints=3)}, fontsize="medium", loc=4)
         plt.grid(True)
 
@@ -110,23 +116,27 @@ def stage2():
         for fold, filename in enumerate(filenames):
             tdice = get_one_log(filename, "Validation DICE score: ")
             print(len(tdice))
-            if len(tdice)>0:
+            if len(tdice) > 0:
                 mvalues.append(np.amax(tdice))
                 folds_scores[fold].append(tdice)
-        out_string += f"8folds {model}: {np.mean(mvalues):0.4f}" + "\u00B1" + f"{np.std(mvalues):0.4f}\n"
+        out_string += f"{len(mvalues)}folds|{model}: {np.mean(mvalues):0.4f}" + "\u00B1" + f"{np.std(mvalues):0.4f}\n"
 
     print(out_string)
     for fold in range(8):
-        plt.subplot(2, 4, 1 + fold)
+        plt.subplot(3, 3, 1 + fold)
         fold_lst = folds_scores[fold]
         for z, (values, net_name) in enumerate(zip(fold_lst, net_names)):
-            line1 = plot_with_features(values, net_name, COLORS[2 * z], f"{fold} fold")
+            line1 = plot_with_features(values, net_name, COLORS[z], f"{fold} fold")
         plt.legend(handler_map={line1: HandlerLine2D(numpoints=3)}, fontsize="medium", loc=4)
         plt.grid(True)
 
-    # plt.subplot(3, 3, 1)
-    # line1 = plot_with_features(dices[0], f"{out_string}" + "1fold ref", color=COLORS[1], title=names[0])
-    # plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, fontsize="medium", loc=4)
+    plt.subplot(3, 3, 9)
+    for z, value in enumerate(out_string.split("\n")):
+        # line1, = plt.plot([0], color='w', label=out_string)
+        line1, = plt.plot(0, color=COLORS[z], label=value)
+        plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, fontsize="medium", loc=5)
+        plt.axis("off")
+
     plt.show()
 
 
