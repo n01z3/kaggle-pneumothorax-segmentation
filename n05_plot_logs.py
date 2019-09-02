@@ -52,7 +52,7 @@ def plot_with_features(values, name, color=COLORS[0], title=None):
     if title:
         plt.title(title)
     plt.ylim(0.72, 0.88)
-    plt.xlim(0, 60)
+    plt.xlim(0, 70)
     plt.grid(True)
 
     if int(title[0]) % 3 == 0:
@@ -109,19 +109,21 @@ def stage2():
     net_names = ["se154", "sx50p", "sx50"]
 
     plt.figure(figsize=(15, 15))
-    out_string = ""
+    out_string, out_string4 = "", ""
     for model in net_names:
         filenames = sorted(glob(f"logs/stage2/{model}/*log"))
         mvalues = []
         for fold, filename in enumerate(filenames):
             tdice = get_one_log(filename, "Validation DICE score: ")
-            print(len(tdice))
+            print(f"{model} fold{fold} epoch:{len(tdice)}")
             if len(tdice) > 0:
                 mvalues.append(np.amax(tdice))
                 folds_scores[fold].append(tdice)
         out_string += f"{len(mvalues)}folds|{model}: {np.mean(mvalues):0.4f}" + "\u00B1" + f"{np.std(mvalues):0.4f}\n"
+        out_string4 += f"{4}folds|{model}: {np.mean(mvalues[:4]):0.4f}" + "\u00B1" + f"{np.std(mvalues[:4]):0.4f}\n"
 
     print(out_string)
+    print(out_string4)
     for fold in range(8):
         plt.subplot(3, 3, 1 + fold)
         fold_lst = folds_scores[fold]
@@ -131,11 +133,12 @@ def stage2():
         plt.grid(True)
 
     plt.subplot(3, 3, 9)
-    for z, value in enumerate(out_string.split("\n")):
-        # line1, = plt.plot([0], color='w', label=out_string)
-        line1, = plt.plot(0, color=COLORS[z], label=value)
-        plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, fontsize="medium", loc=5)
-        plt.axis("off")
+    for tstring in [out_string, out_string4]:
+        for z, value in enumerate(tstring.split("\n")):
+            # line1, = plt.plot([0], color='w', label=out_string)
+            line1, = plt.plot(0, color=COLORS[z], label=value)
+            plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, fontsize="medium", loc=5)
+            plt.axis("off")
 
     plt.show()
 
