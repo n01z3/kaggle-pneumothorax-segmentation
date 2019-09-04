@@ -1,7 +1,7 @@
 # kaggle pneumothorax segmentation #
 https://www.kaggle.com/c/siim-acr-pneumothorax-segmentation
 ----
-Code for [ods.ai] Dies Irae team from SIIM-ACR Pneumothorax Segmentation challenge.
+Code from `[ods.ai] Dies Irae` team from SIIM-ACR Pneumothorax Segmentation challenge.
 
 Features of the solution:
 * Loss: BCE + DICE. No weighing or log. Just the sum of the losses.
