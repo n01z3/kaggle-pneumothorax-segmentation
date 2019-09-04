@@ -1,0 +1,137 @@
+ololo
+fold4 loaded outs/0.84171_sx50_fold4_best.pth
+Epoch [0]
+Mean loss on train: 0.40685291929625034 Mean DICE on train: 0.730351796891521
+START validation
+Epoch:  0  Threshold:  0.5  Validation DICE score: 0.8390907156468214
+IMPROVEMENT with delta:0.838091|on epoch0|stage1
+Epoch [1]
+Mean loss on train: 0.41013410652315807 Mean DICE on train: 0.7302703242477838
+START validation
+Epoch:  1  Threshold:  0.5  Validation DICE score: 0.8376621902100029
+Epoch [2]
+Mean loss on train: 0.40369859212915676 Mean DICE on train: 0.736470933521514
+START validation
+Epoch:  2  Threshold:  0.5  Validation DICE score: 0.8383430977034914
+Epoch [3]
+Mean loss on train: 0.41101787239313126 Mean DICE on train: 0.7309259324276901
+START validation
+Epoch:  3  Threshold:  0.5  Validation DICE score: 0.840387398247636
+IMPROVEMENT with delta:0.001297|on epoch3|stage1
+Epoch [4]
+Mean loss on train: 0.4095932078897924 Mean DICE on train: 0.726695010314458
+START validation
+Epoch:  4  Threshold:  0.5  Validation DICE score: 0.8351411947289142
+Epoch [5]
+Mean loss on train: 0.4042689748580353 Mean DICE on train: 0.7373787915971872
+START validation
+Epoch:  5  Threshold:  0.5  Validation DICE score: 0.8401113824303098
+IMPROVEMENT with delta:-0.000276|on epoch5|stage1
+Epoch [6]
+Mean loss on train: 0.40669080272763464 Mean DICE on train: 0.7327363022623821
+START validation
+Epoch:  6  Threshold:  0.5  Validation DICE score: 0.8379729031507184
+Epoch [7]
+Mean loss on train: 0.40917013757628423 Mean DICE on train: 0.7301923847322832
+START validation
+Epoch:  7  Threshold:  0.5  Validation DICE score: 0.8377902155317452
+Epoch [8]
+Mean loss on train: 0.4046276256597065 Mean DICE on train: 0.7323440035529604
+START validation
+Epoch:  8  Threshold:  0.5  Validation DICE score: 0.8363685342848848
+Epoch [9]
+Mean loss on train: 0.4047720447052955 Mean DICE on train: 0.7280057297672281
+START validation
+Epoch:  9  Threshold:  0.5  Validation DICE score: 0.8355859240891073
+Epoch [10]
+Mean loss on train: 0.4078405995405633 Mean DICE on train: 0.7319447087680192
+START validation
+Epoch:  10  Threshold:  0.5  Validation DICE score: 0.8410226544545623
+IMPROVEMENT with delta:0.000911|on epoch10|stage1
+Epoch [11]
+Mean loss on train: 0.4062656192459922 Mean DICE on train: 0.7252552595777119
+START validation
+Epoch:  11  Threshold:  0.5  Validation DICE score: 0.8358348581639584
+Epoch [12]
+Mean loss on train: 0.4055378690390387 Mean DICE on train: 0.7352198286609979
+START validation
+Epoch:  12  Threshold:  0.5  Validation DICE score: 0.840633358079805
+IMPROVEMENT with delta:-0.000389|on epoch12|stage1
+Epoch [13]
+Mean loss on train: 0.41096126183037995 Mean DICE on train: 0.729062377736104
+START validation
+Epoch:  13  Threshold:  0.5  Validation DICE score: 0.8403760480737273
+IMPROVEMENT with delta:-0.000257|on epoch13|stage1
+Epoch [14]
+Mean loss on train: 0.40803425968557683 Mean DICE on train: 0.7342825023355577
+START validation
+Epoch:  14  Threshold:  0.5  Validation DICE score: 0.8374262779596023
+fold4 loaded outs/0.84171_sx50_fold4_best.pth
+fold4 loaded outs/0.84171_sx50_fold4_best.pth
+Epoch [0]
+Mean loss on train: 0.41136988487673415 Mean DICE on train: 0.7326187583130204
+START validation
+Epoch:  0  Threshold:  0.5  Validation DICE score: 0.8375804112088362
+Epoch [1]
+Mean loss on train: 0.4085524932663125 Mean DICE on train: 0.7334327189673129
+START validation
+Epoch:  1  Threshold:  0.5  Validation DICE score: 0.8363989064700816
+Epoch [2]
+Mean loss on train: 0.40495672368154284 Mean DICE on train: 0.7297391594590071
+START validation
+Epoch:  2  Threshold:  0.5  Validation DICE score: 0.8388865869622101
+Epoch [3]
+Mean loss on train: 0.40647777491396475 Mean DICE on train: 0.7339708333899202
+START validation
+Epoch:  3  Threshold:  0.5  Validation DICE score: 0.8352907156891255
+Epoch [4]
+Mean loss on train: 0.4006391954758475 Mean DICE on train: 0.7369997589105396
+START validation
+Epoch:  4  Threshold:  0.5  Validation DICE score: 0.8370989226857407
+Epoch [5]
+Mean loss on train: 0.4102027829051133 Mean DICE on train: 0.733737808089519
+START validation
+Epoch:  5  Threshold:  0.5  Validation DICE score: 0.8355594779579654
+Epoch [6]
+Mean loss on train: 0.4006060320179108 Mean DICE on train: 0.7397769843424657
+START validation
+Epoch:  6  Threshold:  0.5  Validation DICE score: 0.8411710926998945
+IMPROVEMENT with delta:0.000795|on epoch6|stage2
+Epoch [7]
+Mean loss on train: 0.41024677568881346 Mean DICE on train: 0.7320378576688245
+START validation
+Epoch:  7  Threshold:  0.5  Validation DICE score: 0.8387614580541222
+Epoch [8]
+Mean loss on train: 0.40669562563471906 Mean DICE on train: 0.7298810889317247
+START validation
+Epoch:  8  Threshold:  0.5  Validation DICE score: 0.8331217723820563
+Epoch [9]
+Mean loss on train: 0.40922981571128014 Mean DICE on train: 0.7369463520681628
+START validation
+Epoch:  9  Threshold:  0.5  Validation DICE score: 0.8373783909319055
+Epoch [10]
+Mean loss on train: 0.4027329176810722 Mean DICE on train: 0.7381402790049963
+START validation
+Epoch:  10  Threshold:  0.5  Validation DICE score: 0.838592911711227
+Epoch [11]
+Mean loss on train: 0.3979141969122602 Mean DICE on train: 0.7402435987627723
+START validation
+Epoch:  11  Threshold:  0.5  Validation DICE score: 0.8342877482540411
+Epoch [12]
+Mean loss on train: 0.41097338561193053 Mean DICE on train: 0.729809561041662
+START validation
+Epoch:  12  Threshold:  0.5  Validation DICE score: 0.8386834813301461
+Epoch [13]
+Mean loss on train: 0.4077171284732461 Mean DICE on train: 0.7325077675611003
+START validation
+Epoch:  13  Threshold:  0.5  Validation DICE score: 0.8425037397725211
+IMPROVEMENT with delta:0.001333|on epoch13|stage2
+Epoch [14]
+Mean loss on train: 0.4032962910787741 Mean DICE on train: 0.7345697312266734
+START validation
+Epoch:  14  Threshold:  0.5  Validation DICE score: 0.8383784725530253
+Epoch [15]
+Mean loss on train: 0.41067478304079436 Mean DICE on train: 0.7355639558838214
+START validation
+Epoch:  15  Threshold:  0.5  Validation DICE score: 0.8374499520574749
+fold4 loaded outs/0.84250_sx50_fold4_best.pth
